@@ -8,18 +8,45 @@ package XMLApplet;
 
 import XMLApplet.Parser;
 import java.awt.*;
-import java.applet.Applet;
+import javax.swing.*;
 import java.util.*;
+import java.net.*;
 
 /**
  * @author session
  */
-public class XMLApplet extends Applet {
-
-	public void paint(Graphics g) {
-		Parser p = new Parser();
-		p.parse("/home/session/src/cs332/XMLApplet/students.xml");
+public class XMLApplet extends JApplet {
+	private Parser p;
+	private String url;
+	private String filename;
+	
+	public void init() {
+		String message = "Pie Chart Applet";
+		JButton b1 = new JButton("Ages");
+		getContentPane().add(b1);
+	}
+	
+	public void start() {
+		// Construct the URL
+		filename = getParameter("data");
+		if (filename == null) {
+			filename = "students.xml";
+		}
+		url = getCodeBase() + filename;
 		
+		// Initialize the parser
+		p = new Parser();
+		
+		// Try to parse the given URL
+		try {
+			URL urlStream = new URL(url);
+			p.parse(urlStream.openStream());
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+	}
+	
+	public void paint(Graphics g) {
 		Dimension d = getSize();
 		g.setColor(Color.gray);
 		g.fillRect(0, 0, d.width, d.height);
@@ -30,7 +57,10 @@ public class XMLApplet extends Applet {
 		Set ages = ageHash.keySet();
 		
 		Iterator i;
-		int y = 20;
+		//g.drawString(getCodeBase() + "students.xml", 10, 10);
+		g.drawString(url, 10, 10);
+		
+		int y = 30;
 		for (i = ages.iterator(); y < d.height && i.hasNext(); y+=24) {
 				String key = i.next().toString();
 				String value = ageHash.get(key).toString();
@@ -42,7 +72,7 @@ public class XMLApplet extends Applet {
 		Parser p = new Parser();
 		p.parse(args[0]);
 		
-		HashMap ageHash = p.getGPAs();
+		HashMap ageHash = p.getAges();
 		System.out.println("hash: " + ageHash);
 		Set ages = ageHash.keySet();
 		for (Iterator i = ages.iterator(); i.hasNext(); ) {

@@ -53,6 +53,19 @@ public class Parser extends DefaultHandler {
 		}
 	}
 	
+	public void parse (InputStream url) {
+		// Use the default (non-validating) parser
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		
+		try {
+			// Parse the input 
+			SAXParser saxParser = factory.newSAXParser();
+			saxParser.parse(url, this);
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+	}
+	
 	/**
 	 * @return HashMap Hash with keys of different ages found and values of their occurences
 	 */
@@ -88,32 +101,32 @@ public class Parser extends DefaultHandler {
 	}
 
 	public void characters(char buf[], int offset, int len) throws SAXException {
-		String s = new String(buf, offset, len);
+		String key = new String(buf, offset, len);
 		int value = 0;
 	
 		if (element == null || element.equals("")) {
 			return;
 		} else if (element.equals("age")) {
 			// Check to see if a key/value pair exists for this age
-			if (ages.containsKey(s) && (ages.get(s) != null)) {
-				value = ((Integer)ages.get(s)).intValue();
+			if (ages.containsKey(key) && (ages.get(key) != null)) {
+				value = ((Integer)ages.get(key)).intValue();
 			}
 			value++;
-			ages.put(s, new Integer(value));
+			ages.put(key, new Integer(value));
 		} else if (element.equals("major")) {
 			// Check to see if a key/value pair exists for this age
-			if (majors.containsKey(s) && (majors.get(s) != null)) {
-				value = ((Integer)majors.get(s)).intValue();
+			if (majors.containsKey(key) && (majors.get(key) != null)) {
+				value = ((Integer)majors.get(key)).intValue();
 			}
 			value++;
-			majors.put(s, new Integer(value));
+			majors.put(key, new Integer(value));
 		} else if (element.equals("gpa")) {
 			// Check to see if a key/value pair exists for this age
-			if (gpas.containsKey(s) && (gpas.get(s) != null)) {
-				value = ((Integer)gpas.get(s)).intValue();
+			if (gpas.containsKey(key) && (gpas.get(key) != null)) {
+				value = ((Integer)gpas.get(key)).intValue();
 			}
 			value++;
-			gpas.put(s, new Integer(value));
+			gpas.put(key, new Integer(value));
 		}
 	}
 }
