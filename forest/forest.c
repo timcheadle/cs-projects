@@ -14,7 +14,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: forest.c,v 1.1 2002-12-04 05:46:44 session Exp $
+ * $Id: forest.c,v 1.2 2002-12-04 06:24:37 session Exp $
  */
 
 #include <GL/gl.h>
@@ -35,6 +35,7 @@ struct Tree {
 	float x;
 	float y;
 	float z;
+	float r;
 } trees[NUM_TREES];
 	
 
@@ -46,9 +47,9 @@ void init(void)
 	/* Add an ambient light with a grey color */
 	GLfloat light0_specular[]  = { 1.0, 1.0, 1.0, 1.0 };
 	GLfloat light0_shininess[] = { 100.0 };
-	GLfloat light0_position[]  = { 30.0, 60.0, 30.0, 1.0 };
-	GLfloat light0_diffuse[] = { 1.0, 0.6, 0.7, 1.0 };
-	GLfloat light0_ambient[]   = { 0.8, 0.8, 0.8, 1.0 };
+	GLfloat light0_position[]  = { 15.0, 60.0, 35.0, 1.0 };
+	GLfloat light0_diffuse[] = { 0.8, 0.6, 0.6, 1.0 };
+	GLfloat light0_ambient[]   = { 0.4, 0.4, 0.4, 1.0 };
 
 	glClearColor (0.0, 0.03, 0.05, 0.0);
 	glShadeModel (GL_SMOOTH);
@@ -69,9 +70,10 @@ void init(void)
 	
 	/* Generate tree locations */
 	for(int i=0; i < NUM_TREES; i++) {
-		trees[i].x = (rand() % 1600)/10.0 - 100.0;
+		trees[i].x = (rand() % 1350)/10.0 - 100.0;
 		trees[i].y = (rand() % 100)/10.0 + 2.0;
-		trees[i].z = (rand() % 1600)/10.0 - 100.0;
+		trees[i].z = (rand() % 1350)/10.0 - 100.0;
+		trees[i].r = (rand() % 60)/100.0 + 0.1;
 	}
 }
 
@@ -140,7 +142,7 @@ GLuint LoadTextureRAW( const char * filename, int wrap )
 void display(void)
 {
 	GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
-	GLuint texture; 
+	GLuint texture, texture2; 
 	
 	/* Floor properties */
 	GLfloat floor_diffuse[] = { 0.2, 0.5, 0.8, 1.0 };
@@ -149,9 +151,14 @@ void display(void)
 	GLfloat high_shininess[] = { 100.0 };
 
 	/* Trunk & branch properties */
-	GLfloat wood_diffuse[] = { 0.5, 0.7, 0.1, 1.0 };
-	GLfloat wood_ambient[] = { 1, 1, 1, 1 };
+	GLfloat wood_diffuse[] = { 0.4, 0.8, 0.2, 1.0 };
+	GLfloat wood_ambient[] = { 0.4, 0.8, 0.2, 1.0 };
 	GLfloat wood_specular[] = { 0.5, 0.7, 0.1, 1.0 };
+	
+	GLfloat sun_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat sun_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
+	GLfloat sun_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat sun_emission[] = { 1.0, 1.0, 1.0, 1.0 };
 	
 
 	/* Clear the output color buffer) */
@@ -159,6 +166,7 @@ void display(void)
 	
 	/* Get texture */
 	texture = LoadTextureRAW("grass-tile.bmp", 1);
+	texture2 = LoadTextureRAW("gravel-tile.bmp", 1);
 	glBindTexture( GL_TEXTURE_2D, texture );
 
 	/* Floor */
@@ -175,15 +183,15 @@ void display(void)
 		
 		glTexCoord2f(TEX_SCALE, 0);
 		glNormal3i(0, 1, 0);
-		glVertex3i(25, 0, -100);
+		glVertex3i(35, 0, -100);
 		
 		glTexCoord2f(0, 0);
 		glNormal3i(0, 1, 0);
-		glVertex3i(25, 0, 25);
+		glVertex3i(35, 0, 35);
 		
 		glTexCoord2f(0, TEX_SCALE);
 		glNormal3i(0, 1, 0);
-		glVertex3i(-100, 0, 25);
+		glVertex3i(-100, 0, 35);
 	glEnd();
 	glPopMatrix();
 
@@ -199,6 +207,7 @@ void display(void)
 		float x = trees[i].x;
 		float y = trees[i].y;
 		float z = trees[i].z;
+		float r = trees[i].r;
 		
 		#ifdef DEBUG
 		printf("[%2.0d] x, y, z = %0.2f, %2.0f, %0.2f\n", i, x, y, z);
@@ -207,17 +216,29 @@ void display(void)
 		glPushMatrix();
 		glTranslatef(x, 0.0, z);
 		glRotatef(-90.0, 1.0, 0.0, 0.0);
-		glutSolidCone(0.3, y, 60, 40);
+		glutSolidCone(r, y, 30, 10);
 		glPopMatrix();
 	}
 	
+	GLUquadricObj *q = gluNewQuadric();
+	gluQuadricNormals(q, GL_SMOOTH);					// Generate Smooth Normals For The Quad
+	gluQuadricTexture(q, GL_TRUE);						// Enable Texture Coords For The Quad
+	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);			// Set Up Sphere Mapping
+	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);			// Set Up Sphere Mapping
+	glBindTexture( GL_TEXTURE_2D, texture2 );
+	
 	glPushMatrix();
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, wood_ambient);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, wood_diffuse);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, wood_specular);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, sun_ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, sun_diffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, sun_specular);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, high_shininess);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, no_mat);
+	glTranslatef(10.0, 10.0, 10.0);
+	gluSphere(q, 1.0, 60, 60); 
 	glPopMatrix();
+	
+	glDisable(GL_TEXTURE_GEN_S);						// Disable Sphere Mapping
+	glDisable(GL_TEXTURE_GEN_T);						// Disable Sphere Mapping
 	
 	glutSwapBuffers();
 	glDeleteTextures( 1, &texture );
@@ -232,8 +253,8 @@ void reshape(int w, int h)
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60.0, 1.0, 10.0, 400.0);
-	gluLookAt(25.0, 10.0, 15.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);	
+	gluPerspective(60.0, 1.0, 2.0, 400.0);
+	gluLookAt(35.0, 15.0, 25.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
