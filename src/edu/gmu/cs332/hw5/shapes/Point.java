@@ -1,5 +1,7 @@
 package edu.gmu.cs332.hw5.shapes;
 
+import java.util.*;
+
 /**
  * Point is a cloneable container class representing a point
  * in 2-dimensional Cartesian coordinates.
@@ -18,6 +20,18 @@ public class Point implements Cloneable {
 	public Point(int x, int y) {
 		this.x = x;
 		this.y = y;
+	}
+	
+	public Point(String point) {
+		try {
+			String delimiters = "(), ";
+			StringTokenizer st = new StringTokenizer(point, delimiters);
+			
+			this.x = Integer.parseInt(st.nextToken());
+			this.y = Integer.parseInt(st.nextToken());
+		} catch (NoSuchElementException n) {
+			n.printStackTrace();
+		}
 	}
 
 	public int getX() { return x; }

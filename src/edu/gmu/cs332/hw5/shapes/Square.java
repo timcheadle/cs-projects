@@ -1,21 +1,30 @@
 package edu.gmu.cs332.hw5.shapes;
 
-
 /**
  * @author session
  */
 public class Square extends Shape {
 	Point bottomLeft;
-	int width;
+	Point topRight;
 	
 	public Square() {
 		bottomLeft = new Point();
-		width = 0;
+		topRight = new Point();
 	}
 	
 	public Square(Point bottomLeft, int width) {
 		this.bottomLeft = bottomLeft;
-		this.width = width;
+		this.topRight = new Point(bottomLeft.getX() + width, bottomLeft.getY() + width);
+	}
+	
+	public Square(Point bottomLeft, Point topRight) {
+		this.bottomLeft = bottomLeft;
+		this.topRight = topRight;
+	}
+	
+	public int getWidth() {
+		double dist = Geometry.distance(bottomLeft, new Point(bottomLeft.getX(), topRight.getY()));
+		return (int)Math.floor(dist + 0.5f);
 	}
 	
 	protected String getName() {
@@ -23,6 +32,6 @@ public class Square extends Shape {
 	}
 	
 	protected String getCoords() {
-		return bottomLeft.toString() + " " + width; 
+		return bottomLeft.toString() + " " + getWidth(); 
 	}
 }
