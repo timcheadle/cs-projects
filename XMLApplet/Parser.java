@@ -50,6 +50,18 @@ public class Parser extends DefaultHandler {
 		}
 	}
 	
+	public HashMap getAges() {
+		return ages;
+	}
+
+	public HashMap getMajors() {
+		return majors;
+	}
+	
+	public HashMap getGPAs() {
+		return gpas;
+	}
+	
 	public void startElement(
 		String namespaceURI,
 		String sName, // simple name
@@ -68,32 +80,35 @@ public class Parser extends DefaultHandler {
 	throws SAXException {
 		element = "";
 	}
-	
+
 	public void characters(char buf[], int offset, int len) throws SAXException {
 		String s = new String(buf, offset, len);
-		int value;
-		
-		if (element.equals("age")) {
-			value = ((Integer)ages.get(s)).intValue();
-			ages.put(s, new Integer(value+1));
+		int value = 0;
+	
+		if (element == null || element.equals("")) {
+			return;
+		} else if (element.equals("age")) {
+			// Check to see if a key/value pair exists for this age
+			if (ages.containsKey(s) && (ages.get(s) != null)) {
+				value = ((Integer)ages.get(s)).intValue();
+			}
+			value++;
+			ages.put(s, new Integer(value));
 		} else if (element.equals("major")) {
-			value = ((Integer)majors.get(s)).intValue();
-			majors.put(s, new Integer(value+1));
+			// Check to see if a key/value pair exists for this age
+			if (majors.containsKey(s) && (majors.get(s) != null)) {
+				value = ((Integer)majors.get(s)).intValue();
+			}
+			System.out.println("encountered major: " + s);
+			value++;
+			majors.put(s, new Integer(value));
 		} else if (element.equals("gpa")) {
-			value = ((Integer)gpas.get(s)).intValue();
-			gpas.put(s, new Integer(value+1));
+			// Check to see if a key/value pair exists for this age
+			if (gpas.containsKey(s) && (gpas.get(s) != null)) {
+				value = ((Integer)gpas.get(s)).intValue();
+			}
+			value++;
+			gpas.put(s, new Integer(value));
 		}
-	}
-	
-	public HashMap getAges() {
-		return ages;
-	}
-
-	public HashMap getMajors() {
-		return majors;
-	}
-	
-	public HashMap getGPAs() {
-		return gpas;
 	}
 }
