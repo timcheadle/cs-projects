@@ -3,7 +3,7 @@
  * 
  * SWE432
  * Homework 8
- * $Date: 2003-11-13 05:49:14 $
+ * $Date: 2003-11-13 07:27:18 $
  */
 
 ////////////////////////////////////////////
@@ -45,17 +45,18 @@ public class H8_tcheadle extends HttpServlet {
 	private static String URLREGEX = "^http://\\S+(?:(?:gif)|(?:jpg)|(?:jpeg)|(?:png))$";
 	
 	// Directory to print HTML
-	private static String HTMLDIR = "/home/tcheadle/public_html/";
+	private static String HTMLDIR = "/home/student/tcheadle/public_html/";
+	private static String HTMLURL = "http://hermes.gmu.edu/~tcheadle/index.html";
 
 	// Collection information
 	private String collectionName;
 	private String collectionDescription;
 	private String indexPhoto;
 	private String bgColor;
-	private ArrayList photos = new ArrayList();
+	private ArrayList photos;
 	
 	// Error tracking
-	private ArrayList errors = new ArrayList();
+	private ArrayList errors;
 	
 	// Inner class to represent individual Photo information
 	private class Photo {
@@ -66,6 +67,7 @@ public class H8_tcheadle extends HttpServlet {
 		public Photo(String url, String desc) {
 			this.url = url;
 			this.description = desc;
+			
 			if (url != null && desc != null && url.matches(URLREGEX)) {
 				this.valid = true;
 			}
@@ -79,6 +81,10 @@ public class H8_tcheadle extends HttpServlet {
 	public void doPost (HttpServletRequest req, HttpServletResponse res)
 		throws ServletException, IOException { 
 
+		// Initialize array lists
+		photos = new ArrayList();
+		errors = new ArrayList();
+
 		// Get collection parameters
 		collectionName = req.getParameter("collectionName");
 		collectionDescription = req.getParameter("collectionDescription");
@@ -87,11 +93,38 @@ public class H8_tcheadle extends HttpServlet {
 		for (int i=0; i < MAXPHOTOS; i++) {
 			String url = req.getParameter("photo" + i + "URL");
 			String desc = req.getParameter("photo" + i + "Description");
-			photos.add(new Photo(url, desc));
+			if (url != null &&
+				desc != null &&
+				!url.equals("") &&
+				!url.equals("http://") &&
+				!desc.equals(""))
+			{
+				photos.add(new Photo(url, desc));
+			}
 		}
 
-		validateParams();
-		generateHTML();
+		if (validateParams()) {
+			generateHTML();
+			res.sendRedirect(HTMLURL);
+		} else {
+			printErrors(res);
+		}
+	}
+	
+	private void printErrors(HttpServletResponse res)
+		throws IOException {
+		ServletOutputStream out = res.getOutputStream();
+		
+		res.setContentType("text/html");
+		out.println("<html>");
+		out.println("<head><title>errors</title></head>");
+		out.println("<body>");
+		out.println("<font color=\"red\"");
+		out.println("<h2>ERRORS:</h2><ul>");
+		for (int i=0; i < errors.size(); i++) {
+			out.println("<li>" + (String)errors.get(i) + "<br>");
+		}
+		out.println("</ul></font></body></html>");
 	}
 
 	private boolean validateParams() {
@@ -112,7 +145,7 @@ public class H8_tcheadle extends HttpServlet {
 			if (index < 1 || index > MAXPHOTOS) {
 				errors.add("Index Photo number needs to be between 1 and 20.");
 				valid = false;
-			} else if (!((Photo)photos.get(index)).isValid()) {
+			} else if (!((Photo)photos.get(index - 1)).isValid()) {
 				errors.add("Index Photo is an invalid photo; make sure URL is valid and description is not blank.");
 			}
 			
@@ -130,15 +163,15 @@ public class H8_tcheadle extends HttpServlet {
 			Photo p = (Photo)photos.get(i);
 			if (!p.isValid()) {
 				if (p.getUrl() != null) {
-					errors.add("Photo " + i + " has an invalid URL.");
+					errors.add("Photo " + (i+1) + " has an invalid URL: " + p.getUrl());
 					valid = false;
 				}
 				if (p.getUrl() == null && p.getDescription() != null) {
-					errors.add("Photo " + i + " has a description but no URL.");
+					errors.add("Photo " + (i+1) + " has a description but no URL: " + p.getDescription());
 					valid = false;
 				}
 				if (p.getUrl() != null && p.getDescription() == null) {
-					errors.add("Photo " + i + " has a valid URL but no description.");
+					errors.add("Photo " + (i+1) + " has a valid URL but no description: " + p.getUrl());
 					valid = false;
 				}
 			}
@@ -217,7 +250,7 @@ public class H8_tcheadle extends HttpServlet {
 
 		fout.write("</center>\n\n");
 
-		fout.write("<table>\n");
+		fout.write("<table width=100% border=1>\n");
 		fout.write("<tr>\n");
 		fout.write("<td>\n");
 		fout.write("<ol>\n");
@@ -233,7 +266,7 @@ public class H8_tcheadle extends HttpServlet {
 		fout.write("</td>\n");
 
 		// Write the index picture (first picture in the array)
-		fout.write("<td>\n");
+		fout.write("<td align=center>\n");
 		
 		String indexImageURL = ((Photo)photos.get(Integer.parseInt(indexPhoto))).getUrl();
 		fout.write("<img SRC=\"" + indexImageURL + "\" Height=200>\n");
@@ -276,7 +309,7 @@ public class H8_tcheadle extends HttpServlet {
 		fout.write("<CENTER>\n");
 		fout.write("<P>\n");
 		fout.write(
-			"<IMG SRC=\"" + cur + "\" Height=" + PICTUREHEIGHT + ">\n");
+			"<IMG SRC=\"" + cur + "\">\n");
 		fout.write("\n");
 		fout.write("<P>\n");
 		fout.write(title + " - <i>" + collectionName + "</i>\n");
