@@ -39,8 +39,10 @@ void network::create_topology ()
 		iface_counter = 1;
 		for (j=1; j <= nnets; j++) {
 			if (!links[i][j]) {
-				exit_interfaces[i][j] = -1; // if interface doesn't exist, assign -1
+				// if interface doesn't exist, assign -1
+				exit_interfaces[i][j] = -1;
 			} else {
+				// if it does exist, assign a local interface number
 				exit_interfaces[i][j] = iface_counter++;
 				net_state_data[i]->nports++;
 				total_interfaces++;
@@ -92,6 +94,7 @@ void network::create_topology ()
 //
 	int index = 0; // assign global interface numbers to each interface
 	
+	// assign "global" interface numbers to each local interface on each router
 	for (i=1; i <= nnets; i++) {
 		for (j=1; j <= nnets; j++) {
 			if (exit_interfaces[i][j] > 0) {
@@ -103,13 +106,18 @@ void network::create_topology ()
 		}
 	}
 	
+	// now figure out which global interface connects to which
 	for (i=0; i < index; i++) { // for each column in interfaces
 		int router = interfaces[i].net;
 		int iface = interfaces[i].ifacenum;
 		for (j = 1; j <= nnets; j++) { // for each column in exit_interfaces
+
+			// look for local interfaces on each router
 			if (exit_interfaces[router][j] == iface) {
 				int end_router = j;
 				int end_iface = exit_interfaces[j][router];
+
+				// look in the interfaces[] matrix to find out that interface's global ID
 				for (k = 0; k < index; k++) {
 					if (interfaces[k].net == end_router && interfaces[k].ifacenum == end_iface) {
 						interfaces[i].other_end = k;
