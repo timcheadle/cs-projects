@@ -3,7 +3,7 @@
  * 
  * SWE432
  * Homework 8
- * $Date: 2003-11-13 05:09:53 $
+ * $Date: 2003-11-13 05:20:39 $
  */
 
 ////////////////////////////////////////////
@@ -49,7 +49,10 @@ public class H8_tcheadle extends HttpServlet {
 	private String collectionDescription;
 	private String indexPhoto;
 	private String bgColor;
-	private ArrayList photos;
+	private ArrayList photos = new ArrayList();
+	
+	// Error tracking
+	private ArrayList errors = new ArrayList();
 	
 	// Inner class to represent individual Photo information
 	private class Photo {
@@ -81,6 +84,44 @@ public class H8_tcheadle extends HttpServlet {
 			}
 		}
 
+		validateParams();
+		generateHTML();
+	}
+
+	public boolean validateParams() {
+		boolean valid = true;
+		
+		// Check to see if our strings are valid
+		if (collectionName == null) {
+			errors.add("Collection Name was blank; please enter a name for the collection.");
+			valid = false;
+		}
+		if (indexPhoto == null) {
+			errors.add("Index photo was not selected; please select which photo should be on the menu page.");
+			valid = false;
+		}
+		if (bgColor == null) {
+			errors.add("No background color was selected; please type a background color.");
+			valid = false;
+		}
+		if (!bgColor.matches(COLORREGEX)) {
+			errors.add("Background color needs to be in RRGGBB format.");
+			valid = false;
+		}
+		
+		// Check to see if each photo URL is valid
+		for (Iterator i = photos.iterator(); i.hasNext(); ) {
+			Photo p = (Photo)i.next();
+			if (!p.getUrl().matches(URLREGEX)) {
+				errors.add("'" + p.getUrl() + "' is not a valid URL.");
+				valid = false;
+			}
+		}
+		
+		return valid;
+	}
+	
+	
 		try {
 			if (images.size() > 0) {
 				writeIndexHTML(images, titles, collectionName, bgColor);
