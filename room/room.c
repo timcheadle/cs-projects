@@ -15,7 +15,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: room.c,v 1.2 2002-11-21 06:20:27 session Exp $
+ * $Id: room.c,v 1.3 2002-11-22 04:14:16 session Exp $
  */
 
 #include <GL/gl.h>
@@ -46,7 +46,7 @@ void init(void)
 	/* Add a positional light with a greenish-blue color */
 	GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
 	GLfloat mat_shininess[] = { 100.0 };
-	GLfloat light0_position[] = { 75.0, 60.0, 50.0, 1.0 };
+	GLfloat light0_position[] = { 150.0, 120.0, 100.0, 1.0 };
 	GLfloat light0_ambient[] = { 0.6, 0.6, 0.6, 1.0 };
 
 	glClearColor (0.0, 0.03, 0.05, 0.0);
@@ -68,80 +68,84 @@ void init(void)
  */
 void display(void)
 {
+	GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
+	
+	/* Floor properties */
+	GLfloat floor_ambient[] = { 0.9, 0.6, 0.6, 1.0 };
+	
+	/* Wall properties */
+	GLfloat wall_diffuse[]  = { 0.8, 0.8, 0.8, 1.0 };
+	
+	/* Frame properties */
+	GLfloat frame_diffuse[] = { 0.2, 0.2, 0.2 };
+	
+	GLfloat mat_ambient[] = { 0.7, 0.7, 0.7, 1.0 };
+	GLfloat mat_ambient_color[] = { 0.8, 0.8, 0.2, 1.0 };
+	GLfloat floor_diffuse[] = { 0.6, 0.2, 0.3, 1.0 };
+	GLfloat mat_diffuse[] = { 0.4, 0.5, 0.8, 1.0 };
+	GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat no_shininess[] = { 0.0 };
+	GLfloat low_shininess[] = { 5.0 };
+	GLfloat high_shininess[] = { 100.0 };
+	GLfloat mat_emission[] = {0.3, 0.2, 0.2, 0.0};
+
 	/* Clear the output color buffer) */
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	/* Floor */
-	glColor3f(0.9, 0.2, 0.9);
 	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, floor_ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, no_mat);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, low_shininess);
+	glMaterialfv(GL_FRONT, GL_EMISSION, no_mat);
+	glNormal3f(0.0, 0.0, -1.0);
 	glRotatef(90.0, 1.0, 0.0, 0.0);
-	glRecti(0 ,0 ,150 ,100);
+	glRecti(0, 0, 150, 100);
+	glPopMatrix();
+	
+	/* Back wall */
+	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, no_mat);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, wall_diffuse);
+	glNormal3f(0.0, 0.0, 1.0);
+	glRecti(0, 0, 150, 60);
 	glPopMatrix();
 	
 	/* Left wall */
-	glColor3f(0.3, 0.2, 0.9);
 	glPushMatrix();
+	glNormal3f(0.0, 0.0, -1.0);
 	glRotatef(-90.0, 0.0, 1.0, 0.0);
 	glRecti(0, 0, 100, 60);
 	glPopMatrix();
 	
-	/* Back wall */
-	glColor3f(0.5, 0.7, 0.9);
+	/* Painting frame */
 	glPushMatrix();
-	glRecti(0, 0, 150, 60);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, no_mat);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, frame_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, low_shininess);
+	glMaterialfv(GL_FRONT, GL_EMISSION, no_mat);
+	glRotatef(-90.0, 0.0, 1.0, 0.0);
+	glTranslatef(0.0, 0.0, -0.9);
+	glNormal3f(0.0, 0.0, -1.0);
+	glRecti(25.0, 10.0, 75.0, 50.0);
 	glPopMatrix();
 	
 	/* Painting on left wall */
-	glColor3f(0.9, 0.9, 0.9);
 	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, no_mat);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, high_shininess);
+	glMaterialfv(GL_FRONT, GL_EMISSION, no_mat);
 	glRotatef(-90.0, 0.0, 1.0, 0.0);
 	glTranslatef(0.0, 0.0, -1.0);
+	glNormal3f(0.0, 0.0, -1.0);
 	glRecti(30.0, 15.0, 70.0, 45.0);
 	glPopMatrix();
 	
 	glutSwapBuffers();
-}
-
-/*
- * Update the angle of rotation for the pinocchio
- * every frame of rotation is on; then time off the next frame
- */
-void spinCamera(int temp)
-{
-	if (rotating) {
-	
-		/* update the angle of rotation for the circle */
-		angle = (angle + change);
-		if (angle > 2*PI) {
-			angle = angle - 2*PI;
-			/* switch directions if the circle of rotation is complete */
-			if (phase == 1) {
-				phase = 2;
-			} else if (phase == 2) {
-				phase = 1;
-			}
-		}
-		
-		/* now change the up vector */
-		up_angle = (angle + change) + (PI/2);
-		
-		glutPostRedisplay();
-	}
-	
-	/* reposition the camera with the updated angles */
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);
-	if (phase == 1) {
-		gluLookAt(radius*sin(angle), 0.0, radius*cos(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-	} else if (phase == 2) {
-		gluLookAt(0.0, radius*sin(angle), radius*cos(angle), 0.0, 0.0, 0.0, 0.0, sin(up_angle), cos(up_angle));
-	}
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	
-	/* time off the next frame */
-	glutTimerFunc(delay, spinCamera, 1);
 }
 
 /*
@@ -152,7 +156,6 @@ void reshape(int w, int h)
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	/*glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);*/
 	gluPerspective(60.0, 1.0, 10.0, 400.0);
 	gluLookAt(250.0, 100.0, 150.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);	
 	glMatrixMode(GL_MODELVIEW);
@@ -166,22 +169,8 @@ void reshape(int w, int h)
 void keyboard(unsigned char key, int x, int y) 
 {
 	switch (key) {
-		case 's':
-		case 'S':
-			/* toggle rotating flag on/off */
-			rotating = !rotating;
-			break;
-
 		case 27: /* ESC key */
 			exit(0);
-			break;
-		
-		/* change how fast the rotation is */
-		case 43:
-			change *= 1.5;
-			break;
-		case 45:
-			change /= 1.5;
 			break;
 			
 		default:
@@ -205,7 +194,6 @@ int main(int argc, char** argv)
 	glutDisplayFunc(display); 
 	glutReshapeFunc(reshape); 
 	glutKeyboardFunc(keyboard);
-	glutTimerFunc(delay, spinCamera, 1);
 	glutMainLoop();
 	return 0;
 }
