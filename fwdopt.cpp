@@ -1,4 +1,5 @@
-// last changed 9-13-99
+/
+ last changed 9-13-99
 #ifndef HEADERFILE
 #include "nw.h"
 #endif
@@ -21,8 +22,15 @@ byte network::forward_iface(subnet_state* this_net,byte destnet)
 // from this network router to that network;
 // Return that value.
 //
+	byte curr_hop = this_net->netnum;
+	byte next_hop = this_net->routes->router[destnet];
+	for (int i = 0; i < nnets; i++) {
+			if (exit_interfaces[curr_hop][i] == destnet) {
+				return exit_interfaces[curr_hop][i];
+			}
+	}
 
-  return 0; // student must replace 0 with code
+	return 0; // student must replace 0 with code
 }
 
 //
@@ -34,7 +42,9 @@ next_hops stack::optimize_routes(byte source)
 // source is the subnet number of router (at packet source) that seeks
 // to find an optimal sent of routes for its packets
 //
-  next_hops forward_routers; // create next_hop vector here to return
+	next_hops forward_routers; // create next_hop vector here to return
+
+	byte
 //
 // Dijkstra's route optimization algorithm for NW
 // ----------------------------------------------
@@ -51,6 +61,13 @@ next_hops stack::optimize_routes(byte source)
 //   from source to n;
 //   initialize forward_routers.router[n] to n;
 // }
+
+R[0] = source;
+for (int i=0; i < nnets; i++) {
+	C[i] = cost(source, source, i);
+	forward_routers[i] = i;
+}
+
 // do for all h from 1 to nnets,
 // {
 //   add to R the router with the least-cost path to source:
@@ -65,6 +82,25 @@ next_hops stack::optimize_routes(byte source)
 //       set R[h] to n;
 //     }
 //   }
+
+int routers_full = 0;
+for (int h=0; h < nnets && !routers_full; h++) {
+	float cost_of_h = HUGEFLOAT;
+	for (int n=0; n < nnets && !skip_n; n++) {
+		for (int j=0; j < h; j++) {
+			if (R[j] == n) {
+				skip_n = 1;
+				last;
+			}
+		}
+		if (C[n] < cost_of_h) {
+			cost_of_h = C[n];
+			R[h] = n;
+		}
+	}
+	skip_n = 0;
+		
+
 // 
 //   update the least-cost paths:
 //   do for all n from 1 to nnets, 
@@ -76,6 +112,15 @@ next_hops stack::optimize_routes(byte source)
 //       set forward_routers.router[n] to forward_routers.router[R[h]];
 //     }
 //   }
+
+	for (int n=0; n < nnets; n++) {
+		cost_of_h_to_n = cost(R[h], source, n);
+		if ((C[R[h]] + cost_of_h_to_n) < C[n]) {
+			C[n] = C[R[h]] + cost_of_h_to_n;
+			forward_routers.router[n] = forward_routers.router[R[h]];
+		}
+	}
+
 //
 //   stopping rule- quit when all routers are in R:
 //   do for all n from 1 to nnets,
@@ -84,6 +129,10 @@ next_hops stack::optimize_routes(byte source)
 //   if no such n is found, break out of this (do for h) loop;
 // }.
 //
+
+	for (int n=1; n < nnets; n++) {
+		for (int j=0; j < h; j++) {
+			if (
 
 
   return forward_routers;
