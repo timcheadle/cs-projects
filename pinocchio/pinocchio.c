@@ -10,7 +10,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: pinocchio.c,v 1.4 2002-10-15 05:13:29 session Exp $
+ * $Id: pinocchio.c,v 1.5 2002-10-15 06:18:49 session Exp $
  */
 
 #include <GL/gl.h>
@@ -22,13 +22,16 @@
 
 #define PI 3.141592654
 
-static GLint horiz_spin = 0;
-static GLint vert_spin = 0;
-static GLfloat angle = 0.0; /* angle of rotation to spin the pinocchio */
-static GLfloat red   = 0.3, green = 0.9, blue  = 0.3; /* color of polygons */
-static GLfloat change = (1.0/60.0) * 2.0 * PI;
-static GLfloat radius = 30.0;
-static GLfloat delay = 10.0;
+static GLint phase = 1; /* Phase of rotation demo
+                         *  = 1 -> rotating on X-Z plane
+                         *  = 2 -> rotating on Y-Z plane
+                         */
+static GLint rotating = 0; /* Rotation on/off flag */
+static GLfloat angle = 0.0; /* angle of rotation to spin the camera */
+static GLfloat up_angle = 0.0; /* angle of rotation to move the camera's up vector */
+static GLfloat change = (1.0/360.0) * 2.0 * PI;
+static GLfloat radius = 30.0; /* Radius of circles of rotation */
+static GLfloat delay = 10.0; /* Delay (in ms) between frame updates */
 
 /*
  * Initialize the window buffer
@@ -108,17 +111,6 @@ void display(void)
 	
 	glutSwapBuffers();
 	
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);
-	if (horiz_spin) {
-		gluLookAt(radius*cos(angle), 0.0, radius*sin(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-	} else if (vert_spin) {
-		gluLookAt(radius*cos(angle), 0.0, radius*sin(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-	}
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	
 	/*printf("angle: %f, radius: %f, change: %f, cos: %f, sin: %f\n", angle, radius, change, radius*cos(angle), radius*sin(angle));*/
 }
 
@@ -128,13 +120,33 @@ void display(void)
  */
 void spinCamera(int temp)
 {
-	/* If the spinning flag is on, rotate clockwise by an angle (2 * PI)/60 radians */
-	if (horiz_spin || vert_spin) {
+	if (rotating) {
 		angle = (angle + change);
-		if (angle > 2*PI)
+		if (angle > 2*PI) {
 			angle = angle - 2*PI;
+			if (phase == 1) {
+				phase = 2;
+			} else if (phase == 2) {
+				phase = 1;
+			}
+		}
+		
+		/* now change the up vector */
+		up_angle = (angle + change) + (PI/2);
+		
 		glutPostRedisplay();
 	}
+	
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);
+	if (phase == 1) {
+		gluLookAt(radius*sin(angle), 0.0, radius*cos(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	} else if (phase == 2) {
+		gluLookAt(0.0, radius*sin(angle), radius*cos(angle), 0.0, 0.0, 0.0, 0.0, sin(up_angle), cos(up_angle));
+	}
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 	
 	glutTimerFunc(delay, spinCamera, 1);
 }
@@ -148,7 +160,11 @@ void reshape(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);
-	gluLookAt(radius*cos(angle), 0.0, radius*sin(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	if (phase == 1) {
+		gluLookAt(radius*sin(angle), 0.0, radius*cos(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	} else if (phase == 2) {
+		gluLookAt(0.0, radius*sin(angle), radius*cos(angle), 0.0, 0.0, 0.0, 0.0, sin(up_angle), cos(up_angle));
+	}
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -160,25 +176,10 @@ void reshape(int w, int h)
 void keyboard(unsigned char key, int x, int y) 
 {
 	switch (key) {
-		case 'h':
-		case 'H':
-			/* toggle spinning flag on */
-			horiz_spin = 1;
-			vert_spin = 0;
-			break;
-
-		case 'v':
-		case 'V':
-			/* toggle spinning flag on */
-			vert_spin = 1;
-			horiz_spin = 0;
-			break;
-			
 		case 's':
 		case 'S':
-			/* toggle spinning flag on */
-			vert_spin = 0;
-			horiz_spin = 0;
+			/* toggle rotating flag on/off */
+			rotating = !rotating;
 			break;
 
 		case 27: /* ESC key */
@@ -186,10 +187,10 @@ void keyboard(unsigned char key, int x, int y)
 			break;
 			
 		case 43:
-			change *= 2.0;
+			change *= 1.5;
 			break;
 		case 45:
-			change /= 2.0;
+			change /= 1.5;
 			break;
 			
 		default:
