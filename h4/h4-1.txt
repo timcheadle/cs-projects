@@ -1,0 +1,73 @@
+type matrix
+
+for i = 1 : n
+	sum = 0;
+	for j = 1 : n
+		a(i,j) = ((i-1)/(n-1))^(j-1);
+		sum = sum + a(i,j);
+	end
+	b(i) = sum;
+	b_alt1(i) = sum + (-1^i)*delta;
+	b_alt2(i) = sum + delta;
+end
+
+A = a;
+B = b;
+
+type gauss
+
+for  j = 1 : n-1
+	for i = j+1 : n
+		mult = a(i,j)/a(j,j);
+		for k = j+1 : n
+			a(i,k) = a(i,k) - mult*a(j,k);
+		end
+		b(i) = b(i) - mult*b(j);
+	end
+end
+
+type backsolve
+
+for i = n : -1 : 1
+	for j = i+1 : n
+		b(i) = b(i) - a(i,j)*x(j);
+	end
+	x(i) = b(i)/a(i,i);
+end
+
+n=3; delta=0;
+matrix
+A
+
+A =
+
+   1.00000000000000                  0                  0
+   1.00000000000000   0.50000000000000   0.25000000000000
+   1.00000000000000   1.00000000000000   1.00000000000000
+
+b'
+
+ans =
+
+   1.00000000000000
+   1.75000000000000
+   3.00000000000000
+
+gauss; backsolve;
+x'
+
+ans =
+
+     1
+     1
+     1
+
+A*x'
+
+ans =
+
+   1.00000000000000
+   1.75000000000000
+   3.00000000000000
+
+diary

@@ -1,0 +1,107 @@
+type plotcos
+
+x0 = (pi/2) * (0:(n-1))/(n-1);
+y0 = cos(x0);
+c = newtdd(x0, y0, n);
+x = 0:.01:pi/2;
+y = horner(n-1, c, x, x0);
+plot(x0, y0, 'o', x, y);
+
+type ploterr
+
+x0 = (pi/2) * (0:(n-1))/(n-1);
+y0 = cos(x0);
+c = newtdd(x0, y0, n);
+x = 0:.01:pi/2;
+y = horner(n-1, c, x, x0);
+semilogy(x, abs(y - cos(x)));
+
+n=5;
+plotcos
+ploterr
+
+n=9;
+ploterr
+max(abs(y-cos(x)))
+
+ans =
+
+   4.3988e-09
+
+type cos1
+
+function y=cos1(x)
+	n = 9;
+
+	% base points
+	xb = (pi/2) * (0:(n-1))/(n-1);
+	yb = cos(xb);
+
+	% find the interpolating polynomial
+	c = newtdd(xb, yb, n);
+
+	% for each element in x, move to cosine's
+	% fundamental domain and evaluate
+	for i=1:size(x,2)
+		xm = mod(x(i), 2*pi);
+
+		% keep track of the right sign
+		s = 1;
+
+		if xm > pi
+			xm = xm - pi;
+			s = -1;
+		end
+		if xm > pi/2
+		xm = pi - xm;
+		s = s * -1;
+		end
+		
+		y(i) = s * horner(n-1, c, xm, xb);
+	end
+
+x=1000;
+abs(cos1(x)-cos(x))
+
+ans =
+
+     2.505007312691987e-11
+
+x=10000;
+abs(cos1(x)-cos(x))
+
+ans =
+
+     5.513128842338233e-10
+
+x=0:10
+
+x =
+
+     0     1     2     3     4     5     6     7     8     9    10
+
+semilogy(x,abs(cos1(x)-cos(x)))
+abs(cos1(x)-cos(x))
+
+ans =
+
+   1.0e-08 *
+
+  Columns 1 through 3 
+
+                  0   0.00588777915311   0.01850139486059
+
+  Columns 4 through 6 
+
+   0.15463990088449   0.01465361165742   0.07206579222263
+
+  Columns 7 through 9 
+
+   0.06638689598049   0.01392554960233   0.15847589907025
+
+  Columns 10 through 11 
+
+   0.01563051910125   0.00425339763410
+
+semilogy(x,abs(cos1(x)-cos(x)))
+diary off
