@@ -1,0 +1,4 @@
+command:  send
+syntax:  send <userid> <message>
+ 
+send <message> to <userid>

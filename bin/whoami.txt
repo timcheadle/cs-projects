@@ -1,0 +1,4 @@
+command:  whoami
+syntax:  whoami
+ 
+displays current userid

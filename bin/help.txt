@@ -1,0 +1,4 @@
+command:  help
+syntax:  help <command_name>
+ 
+displays help information on command.  If no command is passed, displays a list of valid commands

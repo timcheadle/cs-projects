@@ -1,0 +1,4 @@
+command:  mv
+syntax:  mv <file> <new_file>
+ 
+move's <file> to <new_file>

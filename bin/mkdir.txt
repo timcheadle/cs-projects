@@ -1,0 +1,4 @@
+command:  mkdir
+syntax:  mkdir <path>
+ 
+creates a directory at <path>.

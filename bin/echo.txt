@@ -1,0 +1,4 @@
+command:  echo
+syntax:  echo
+ 
+reads in a line of text from keyboard and displays on console

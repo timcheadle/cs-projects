@@ -1,0 +1,4 @@
+command:  rm
+syntax:  rm <file>
+ 
+delete's <file>

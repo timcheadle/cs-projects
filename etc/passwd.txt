@@ -1,0 +1,4 @@
+# password file for os
+# format is username password
+dstein password
+tcheadle 128bit

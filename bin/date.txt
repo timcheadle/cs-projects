@@ -1,0 +1,4 @@
+command:  date
+syntax:  date
+ 
+displays the current system date/time

@@ -1,0 +1,4 @@
+command:  who
+syntax:  who
+ 
+displays a list of userids currently logged in to system

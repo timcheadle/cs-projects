@@ -1,0 +1,4 @@
+command:  cat
+syntax:  cat <file1> <file2> . . .
+ 
+displays the contents of a file on the console.  If no argument is passed, input is read from the keyboard and passed to the console
