@@ -1,15 +1,22 @@
-/*
- * Created on Apr 6, 2003
- *
- * To change this generated comment go to 
- * Window>Preferences>Java>Code Generation>Code Template
- */
-
 /**
+ * Car is a container class to store attributes about a car.  It can store the following attributes:
+ * 
+ * <ul>
+ * <li>Make
+ * <li>Model
+ * <li>Model Year
+ * <li>Color
+ * <li>Cylinders
+ * <li>Horsepower
+ * <li>Torque
+ * </ul>
+ * 
+ * This class implements the {@link Comparable} interface so sorting a list of cars is possible.
+ * 
  * @author Tim Cheadle
  */
 public class Car implements Comparable {
-	private String manufacturer;
+	private String make;
 	private String model;
 	private int modelYear;
 	private String color;
@@ -17,8 +24,11 @@ public class Car implements Comparable {
 	private int torque;
 	private int cylinders;
 	
+	/**
+	 * Constructs a <code>Car</code> object with default ("" or zeroed) values. 
+	 */
 	public Car() {
-		this.manufacturer = new String();
+		this.make = new String();
 		this.model        = new String();
 		this.modelYear    = 0;
 		this.color        = new String();
@@ -27,8 +37,19 @@ public class Car implements Comparable {
 		this.cylinders    = 0;
 	}
 	
+	/**
+	 * Constructs a <code>Car</code> object with the given attributes.
+	 * 
+	 * @param make
+	 * @param model
+	 * @param modelYear
+	 * @param color
+	 * @param horsepower
+	 * @param torque
+	 * @param cylinders
+	 */
 	public Car (
-		String manufacturer,
+		String make,
 		String model,
 		int modelYear,
 		String color,
@@ -36,7 +57,7 @@ public class Car implements Comparable {
 		int torque,
 		int cylinders)
 	{
-		this.manufacturer = manufacturer;
+		this.make         = make;
 		this.model        = model;
 		this.modelYear    = modelYear;
 		this.color        = color;
@@ -46,20 +67,36 @@ public class Car implements Comparable {
 	}
 	
 	/**
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 * Compares the object to the given object.  Returns a negative integer if the
+	 * object preceeds the given object, a positive integer if the given object
+	 * preceeds the object, and a zero if they share the same order.
+	 * 
+	 * Car objects are compared with the following hierarchy:
+	 * <ol>
+	 * <li>make
+	 * <li>model
+	 * <li>model year
+	 * <li>color
+	 * <li>horsepower
+	 * <li>torque
+	 * <li>cylinders
+	 * </ol>
+	 * 
+	 * @param o The object to compare to
+	 * @return A negative integer, zero, or a positive integer as this object is less than, equal to, or greater than the specified object.
 	 */
 	public int compareTo(Object o) {
 		if (o == null) {
-			return -1;
+			throw new NullPointerException();
 		}
 		if (!(o instanceof Car)) {
-			return -1;
+			throw new ClassCastException();
 		}
 		
 		Car c = (Car)o;
 		
-		if (this.manufacturer.compareTo(c.getManufacturer()) != 0) {
-			return this.manufacturer.compareTo(c.getManufacturer());
+		if (this.make.compareTo(c.getMake()) != 0) {
+			return this.make.compareTo(c.getMake());
 		}
 		if (this.model.compareTo(c.getModel()) != 0) {
 			return this.model.compareTo(c.getModel());
@@ -83,8 +120,13 @@ public class Car implements Comparable {
 		return 0;
 	}
 
+	/**
+	 * Returns a comma-delimited description of the car object as a <code>String</code>.
+	 * 
+	 * @return The car's description
+	 */
 	public String toString() {
-		return manufacturer + "," +
+		return make + "," +
 			model + "," +
 			modelYear + "," +
 			color + "," +
@@ -94,98 +136,126 @@ public class Car implements Comparable {
 	}
 
 	/**
-	 * @return
+	 * Returns the car's color as a <code>String</code>.
+	 * 
+	 * @return The car's color
 	 */
 	public String getColor() {
 		return color;
 	}
 
 	/**
-	 * @return
+	 * Returns the car's number of cylinders as an integer.
+	 * 
+	 * @return The car's number of cylinders
 	 */
 	public int getCylinders() {
 		return cylinders;
 	}
 
 	/**
-	 * @return
+	 * Returns the car's horsepower rating as an integer.
+	 * 
+	 * @return The car's horsepower
 	 */
 	public int getHorsepower() {
 		return horsepower;
 	}
 
 	/**
-	 * @return
+	 * Returns the car's make (manufacturer) as a <code>String</code>.
+	 * 
+	 * @return The car's make
 	 */
-	public String getManufacturer() {
-		return manufacturer;
+	public String getMake() {
+		return make;
 	}
 
 	/**
-	 * @return
+	 * Returns the car's model as a <code>String</code>.
+	 * 
+	 * @return The car's model.
 	 */
 	public String getModel() {
 		return model;
 	}
 
 	/**
-	 * @return
+	 * Returns the car's model year as an integer.
+	 * 
+	 * @return The car's model year
 	 */
 	public int getModelYear() {
 		return modelYear;
 	}
 
 	/**
-	 * @return
+	 * Return's the car's torque rating as an integer.
+	 * 
+	 * @return The car's torque
 	 */
 	public int getTorque() {
 		return torque;
 	}
 
 	/**
-	 * @param string
+	 * Sets the car's color.
+	 * 
+	 * @param string A color
 	 */
 	public void setColor(String string) {
 		color = string;
 	}
 
 	/**
-	 * @param i
+	 * Sets the number of cylinders in the car's engine.
+	 * 
+	 * @param i Number of cylinders
 	 */
 	public void setCylinders(int i) {
 		cylinders = i;
 	}
 
 	/**
-	 * @param i
+	 * Sets the horsepower rating of the car's engine.
+	 * 
+	 * @param i Amount of horsepower
 	 */
 	public void setHorsepower(int i) {
 		horsepower = i;
 	}
 
 	/**
-	 * @param string
+	 * Sets the car's make (manufacturer).
+	 * 
+	 * @param string A make
 	 */
 	public void setManufacturer(String string) {
-		manufacturer = string;
+		make = string;
 	}
 
 	/**
-	 * @param string
+	 * Sets the car's model name.
+	 * 
+	 * @param string A model name
 	 */
 	public void setModel(String string) {
 		model = string;
 	}
 
 	/**
-	 * @param i
+	 * Sets the car's model year.
+	 * 
+	 * @param i A model year
 	 */
 	public void setModelYear(int i) {
 		modelYear = i;
 	}
 
 	/**
-	 * @param i
+	 * Sets the torque rating for the car's engine.
+	 * 
+	 * @param i Amount of torque
 	 */
 	public void setTorque(int i) {
 		torque = i;
