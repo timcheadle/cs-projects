@@ -15,7 +15,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: room.c,v 1.1 2002-11-21 05:46:43 session Exp $
+ * $Id: room.c,v 1.2 2002-11-21 06:20:27 session Exp $
  */
 
 #include <GL/gl.h>
@@ -46,8 +46,9 @@ void init(void)
 	/* Add a positional light with a greenish-blue color */
 	GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
 	GLfloat mat_shininess[] = { 100.0 };
-	GLfloat light0_position[] = { 0.0, 50.0, 500.0, 1.0 };
-	GLfloat light0_ambient[] = { 0.0, 0.8, 1.0, 1.0 };
+	GLfloat light0_position[] = { 75.0, 60.0, 50.0, 1.0 };
+	GLfloat light0_ambient[] = { 0.6, 0.6, 0.6, 1.0 };
+
 	glClearColor (0.0, 0.03, 0.05, 0.0);
 	glShadeModel (GL_SMOOTH);
 
@@ -70,62 +71,32 @@ void display(void)
 	/* Clear the output color buffer) */
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	/* Hat */
-	glColor3f(0.3, 0.2, 0.9);
+	/* Floor */
+	glColor3f(0.9, 0.2, 0.9);
 	glPushMatrix();
-	glTranslatef(0.0, 75.0, 0.0);
-	glRotatef(-90.0, 1.0, 0.0, 0.0);
-	glutSolidCone(20.0, 55.0, 30.0, 30.0);
+	glRotatef(90.0, 1.0, 0.0, 0.0);
+	glRecti(0 ,0 ,150 ,100);
 	glPopMatrix();
 	
-	/* Head */
+	/* Left wall */
 	glColor3f(0.3, 0.2, 0.9);
 	glPushMatrix();
-	glTranslatef(0.0, 60.0, 0.0);
-	glutSolidSphere(20.0, 30.0, 30.0);
+	glRotatef(-90.0, 0.0, 1.0, 0.0);
+	glRecti(0, 0, 100, 60);
 	glPopMatrix();
 	
-	/* Body */
-	glColor3f(0.3, 0.2, 0.9);
+	/* Back wall */
+	glColor3f(0.5, 0.7, 0.9);
 	glPushMatrix();
-	glScalef(40.0, 80.0, 20.0);
-	glutSolidCube(1.0);
-	glPopMatrix();
-
-	/* Left Leg */
-	glColor3f(0.3, 0.2, 0.9);
-	glPushMatrix();
-	glTranslatef(-15.0, -55.0, 15.0);
-	glRotatef(-45.0, 1.0, 0.0, 0.0);
-	glScalef(10.0, 60.0, 10.0);
-	glutSolidCube(1.0);
+	glRecti(0, 0, 150, 60);
 	glPopMatrix();
 	
-	/* Right Leg */
-	glColor3f(0.3, 0.2, 0.9);
+	/* Painting on left wall */
+	glColor3f(0.9, 0.9, 0.9);
 	glPushMatrix();
-	glTranslatef(15.0, -55.0, 15.0);
-	glRotatef(-45.0, 1.0, 0.0, 0.0);
-	glScalef(10.0, 60.0, 10.0);
-	glutSolidCube(1.0);
-	glPopMatrix();
-	
-	/* Left Arm */
-	glColor3f(0.3, 0.2, 0.9);
-	glPushMatrix();
-	glTranslatef(-35.0, 0.0, 10.0);
-	glRotatef(30.0, 0.0, 1.0, 0.0);
-	glScalef(40.0, 10.0, 10.0);
-	glutSolidCube(1.0);
-	glPopMatrix();
-	
-	/* Right Arm */
-	glColor3f(0.3, 0.2, 0.9);
-	glPushMatrix();
-	glTranslatef(35.0, 0.0, 10.0);
-	glRotatef(-30.0, 0.0, 1.0, 0.0);
-	glScalef(40.0, 10.0, 10.0);
-	glutSolidCube(1.0);
+	glRotatef(-90.0, 0.0, 1.0, 0.0);
+	glTranslatef(0.0, 0.0, -1.0);
+	glRecti(30.0, 15.0, 70.0, 45.0);
 	glPopMatrix();
 	
 	glutSwapBuffers();
@@ -181,12 +152,9 @@ void reshape(int w, int h)
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);
-	if (phase == 1) {
-		gluLookAt(radius*sin(angle), 0.0, radius*cos(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-	} else if (phase == 2) {
-		gluLookAt(0.0, radius*sin(angle), radius*cos(angle), 0.0, 0.0, 0.0, 0.0, sin(up_angle), cos(up_angle));
-	}
+	/*glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);*/
+	gluPerspective(60.0, 1.0, 10.0, 400.0);
+	gluLookAt(250.0, 100.0, 150.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
