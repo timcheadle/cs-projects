@@ -1,0 +1,65 @@
+
+<title> 
+    CS 330 Syllabus, F-00 (you should be able to get out numbers as
+integers)
+</title>
+
+<HTML>
+
+<HEAD>
+
+<TITLE>  
+    CS330, Fall, 2001 - M. Smeltzer (you should be able to get out numbers
+as integers)
+</TITLE>
+
+</HEAD>
+
+
+should see seven tabs:							
+
+
+<BODY>
+
+<A NAME="TOP"> beginning is not a tag but the end is </A>
+
+-2345.34E-44
+
+<CENTER>
+   <B>
+     <H3> 
+       center and B are tags. H3 is not a tag coz of the 3.
+     </H3>
+   </B>
+</CENTER>
+
+<HELLOWORLD>
+       This is not a tag greater than 6
+</HELLOWORLD>
+
+<CENTER>
+    Section 2:  W 4:30 - 7:10 p.m., DK 1006 (make sure it sees the
+numbers)
+</CENTER>
+
+
+<HR COLOR="#-21E11"> Should point out real
+
+00000 (this should be determained as five seperate integer zeros.)
+
+
+<!-- <B><H3> single line </H3></B>-->
+
+<!-- <B><H3> violating the single line -- because of the middle seperator
+</H3></B>-->
+
+
+<!-- 
+	This is a Multiple Line comment
+-->
+
+
+
+</BODY>
+
+</HTML>

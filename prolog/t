@@ -1,0 +1,5 @@
+dif([X|_], [Y|_]) :- X =\= Y.
+dif([_|T1], [_|T2]) :- 
+	length(T1,N1), length(T2,N2),
+	N1 =\= N2,
+	dif(T1,T2).
