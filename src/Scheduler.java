@@ -54,6 +54,11 @@ public abstract class Scheduler {
 	 * This method will enqueue a process on the IO device queue.
 	 */
 	protected void enqueueIO(Process process) {
+		System.out.println(
+			"Process "
+				+ process.getPid()
+				+ " has been added to the IO device queue.");
+				
 		ioQueue.add(process);
 		System.out.println(ioQueueToString());
 	}

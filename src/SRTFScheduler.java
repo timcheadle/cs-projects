@@ -13,6 +13,11 @@ public class SRTFScheduler extends Scheduler {
 		int index = 0;
 		boolean insert = false;
 
+		System.out.println(
+			"Process "
+				+ process.getPid()
+				+ " has been added to the CPU queue.");
+
 		if (cpuQueue.size() == 0) {
 			cpuQueue.add(process);
 			insert = true;
@@ -31,6 +36,7 @@ public class SRTFScheduler extends Scheduler {
 			cpuQueue.add(process);
 
 		System.out.println(cpuQueueToString());
+
 	}
 
 	/**
@@ -40,6 +46,88 @@ public class SRTFScheduler extends Scheduler {
 	protected void dequeueCPU() {
 		cpuQueue.remove(0);
 		System.out.println(cpuQueueToString());
+	}
+
+	protected void addNewArrivals() {
+		// For each process in processList, see if it has arrived at time i.  If so, 
+		// enqueue the process in the cpuQueue.
+		for (Iterator i = processList.iterator(); i.hasNext();) {
+			Process p = (Process) i.next();
+
+			if (p.getTimeArrive() == clock) {
+				printTime();
+				System.out.println("Process " + p.getPid() + " has arrived.");
+
+				p.setTimeRemaining(p.getBurst());
+
+				// enqueueing the process in the cpuQueue
+				enqueueCPU(p);	
+			}
+		}
+	}
+
+	protected void dispatchCPU() {
+		Process p = (Process) cpuQueue.get(0);
+		p.setState("CPU");
+
+		System.out.println("Process " + p.getPid() + " has dispatched to CPU.");
+		
+		dequeueCPU();
+		usingCPU = p.getPid() - 1;
+
+		System.out.println("Process " + p.getPid() + " has started running.");
+	}
+
+	protected void dispatchIO() {
+		Process p = ((Process) ioQueue.get(0));
+		p.setState("IO"); // Set the state to IO
+
+		System.out.println("Process " + p.getPid() + " dispatched to IO device.");
+
+		// Set usingIO to the process executing
+		dequeueIO(); // Remove the process from the ioQueue
+		usingIO = p.getPid() - 1;		
+		
+		// Set the timeRemaining for the process
+		// to the present burst time
+		p.setTimeRemaining(p.getBurst());
+
+		System.out.println("Process " + p.getPid() + " has started IO.");
+	}
+	
+	protected void updateCPUWait() {
+		for (Iterator i = cpuQueue.iterator(); i.hasNext();) {
+			Process p = (Process) i.next();
+			p.setWaitTime(p.getWaitTime() + 1);
+		}
+	}
+	
+	protected void updateIOWait() {
+		for (Iterator i = ioQueue.iterator(); i.hasNext();) {
+			Process p = (Process) i.next();
+			p.setWaitTime(p.getWaitTime() + 1);
+		}
+	}
+	
+	protected void updateCPUTR() {
+		if (usingCPU != -1) {
+			Process p = (Process) processList.get(usingCPU);
+			p.setTimeRemaining(p.getTimeRemaining() - 1);
+			System.out.println(
+				"Time Remaining/CPU: "
+					+ ((Process) processList.get(usingCPU))
+						.getTimeRemaining());
+		}
+	}
+	
+	protected void updateIOTR() {
+		if (usingIO != -1) {
+			((Process) processList.get(usingIO)).setTimeRemaining(
+				((Process) processList.get(usingIO)).getTimeRemaining()- 1);
+			System.out.println(
+				"Time Remaining/IO: "
+					+ ((Process) processList.get(0)).getTimeRemaining());
+		}
 	}
 
 	/**
@@ -60,27 +148,7 @@ public class SRTFScheduler extends Scheduler {
 		while (clock <= simLength) {
 			firstEvent = false;
 
-			// For each process in processList, see if it has arrived at time i.  If so, 
-			// enqueue the process in the cpuQueue.
-			for (Iterator i = processList.iterator(); i.hasNext();) {
-
-				Process p = (Process) i.next();
-
-				if (p.getTimeArrive() == clock) {
-					printTime();
-					System.out.println(
-						"Process " + p.getPid() + " has arrived.");
-
-					p.setTimeRemaining(p.getBurst());
-
-					System.out.println(
-						"Process "
-							+ p.getPid()
-							+ " has been added to the CPU queue.");
-					enqueueCPU(p);
-					// enqueueing the process in the cpuQueue	
-				}
-			}
+			addNewArrivals();
 
 			// Check to see if CPU and IO device have completed a process.
 
@@ -88,97 +156,64 @@ public class SRTFScheduler extends Scheduler {
 			// time remaining of the processes in queue.  If so, put that process back in queue and
 			// run new process.
 			if (usingCPU != -1) {
-				Process p = ((Process) processList.get(usingCPU));
+				Process presentProcess = ((Process) processList.get(usingCPU));
 
-				if (p.getTimeRemaining() == 0) {
-					
+				// If the present CPU process is done, send it to the I/O queue
+				if (presentProcess.getTimeRemaining() == 0) {
 					printTime();
 
-					System.out.println(
-						"Process " + p.getPid() + " has completed CPU burst.");
-					p.setState("IO"); // Change state					
+					presentProcess.removeBurst(); // Remove completed burst
 
-					p.removeBurst(); // Remove completed burst	
+					System.out.println("Process " + presentProcess.getPid() + " has completed CPU burst.");
+					presentProcess.setState("IO"); // Change state
 
-					System.out.println(
-						"Process "
-							+ p.getPid()
-							+ " has been added to the IO device queue.");
-					enqueueIO(p); // Enqueue for IO
-					
-					usingCPU = -1;
-					
-					if(cpuQueue.size() != 0) {
-						p = ((Process)cpuQueue.get(0));
-						
-						p.setState("CPU");
-						
-						System.out.println(
-							"Process " + p.getPid() + " has dispatched to CPU.");
-							
-						dequeueCPU();
-						
-						usingCPU = p.getPid() - 1;
-						
+					enqueueIO(presentProcess); // Enqueue for IO
+
+					usingCPU = -1; // Set the CPU to idle
+
+					// If there are more process waiting for the CPU, dispatch one
+					if (cpuQueue.size() != 0) {
+						dispatchCPU();
 					}
 				}
 
+				// Check for preemption; this means looking to see if any process in the
+				// CPU queue has a shorter time remaining than the one currently using the CPU
 				if (cpuQueue.size() != 0) {
-					Process q = ((Process) cpuQueue.get(0));
+					Process check = ((Process) cpuQueue.get(0));
 
-					if (p.getTimeRemaining() > q.getTimeRemaining()) {
+					if (presentProcess.getTimeRemaining() > check.getTimeRemaining()) {
 						printTime();
 
-						System.out.println(
-							"Process " + p.getPid() + " being preempted.");
-						
-						q.setTimeRemaining(q.getBurst());
-						
-						dequeueCPU();
-						
-						p.addFirstBurst(p.getTimeRemaining());
-						// Change value of first burst		
-						System.out.println("Process " + p.getPid() + " has been added to the CPU queue.");
-						System.err.println("Process " + p.getPid() + " tR " + p.getTimeRemaining());
-						enqueueCPU(p);
-						// Put p back in queue					
+						System.out.println("Process " + presentProcess.getPid() + " being preempted.");
 
-						System.err.println("usingcpu's time remaining: " + q.getTimeRemaining());
-						System.err.println("PID " + q.getPid());
+						//check.setTimeRemaining(check.getBurst());
 
-						System.out.println(
-							"Process " + q.getPid() + " dispatched to CPU.");
+						//presentProcess.addFirstBurst(presentProcess.getTimeRemaining());
+						// Change value of first burst								
 
-						q.setState("CPU");
-						usingCPU = q.getPid() - 1;
+						System.out.println("Process " + presentProcess.getPid() + " tR " + presentProcess.getTimeRemaining());
 
-						System.err.println("usingcpu = " + usingCPU);
+						enqueueCPU(presentProcess);
+						// Put presentProcess back in queue					
+
+						System.out.println("usingcpu's time remaining: " + check.getTimeRemaining());
+						System.out.println("PID " + check.getPid());
+
+						dispatchCPU();
+
+						System.out.println("usingcpu = " + usingCPU);
 					}
 				}
-			} else if(usingCPU == -1){
+			} else if (usingCPU == -1) {
 				// If the CPU isn't busy, simply run the next (if any) process from the
 				// CPU queue in the CPU
 				if (cpuQueue.size() != 0) {
 					printTime();
-					Process p = ((Process) cpuQueue.get(0));
-					System.out.println(
-						"Process " + p.getPid() + " dispatched to CPU.");
+					dispatchCPU();
+				}
+			}
 
-					usingCPU = p.getPid() - 1;
-					// Set usingCPU to the process executing			
-
-					p.setTimeRemaining(p.getBurst());
-					// Set the timeRemaining for the process
-					// to the present burst time
-					p.setState("CPU"); // Set the state to CPU
-
-					dequeueCPU(); // Remove the process from the cpuQueue
-
-					System.out.println(
-						"Process " + p.getPid() + " has started running.");
-				}					
-			}	
-			
 			// If there is a process using the IO device, see if the process has completed
 			// it's burst.  If so, set the IO device to not busy.
 			if (usingIO != -1) {
@@ -188,83 +223,57 @@ public class SRTFScheduler extends Scheduler {
 					printTime();
 
 					System.out.println("Process " + p.getPid() + " has completed IO burst.");
-					
+					p.removeBurst(); //Remove completed burst
+
 					// If process has another CPU burst, put into the CPU queue
 					if (p.getBurst() != -1) {
 						p.setState("CPU"); //Change state
-						p.removeBurst(); // Remove completed burst
-						p.setTimeRemaining(p.getBurst()); // Update timeRemaining
-					
+						p.setTimeRemaining(p.getBurst());
+						// Update timeRemaining
+
 						// Enqueue for CPU or if there are no more bursts, the 
 						// process has completed.
-						System.out.println("Process " + p.getPid() + " has been added to the CPU queue.");
+						System.out.println(
+							"Process "
+								+ p.getPid()
+								+ " has been added to the CPU queue.");
 						enqueueCPU(p);
+
+						usingIO = -1;
+
 					} else {
-						avgTurnaround = avgTurnaround + (clock - p.getTimeArrive());
+						avgTurnaround =
+							avgTurnaround + (clock - p.getTimeArrive());
 						System.out.println(
 							"Process " + p.getPid() + " complete.");
 					}
 
-					usingIO = -1;
+					if (ioQueue.size() != 0) {
+						dispatchIO();
+					}
 				}
-			} else if(usingIO == -1){
+
+			} else if (usingIO == -1) {
 				// If the IO device is not busy, take the first process in the ioQueue and 
 				// dispatch it to the IO device.
 				if (ioQueue.size() != 0) {
 					printTime();
-					Process p = ((Process) ioQueue.get(0));
-					System.out.println(
-						"Process "
-							+ p.getPid()
-							+ " dispatched to IO device.");
-
-					usingIO = p.getPid() - 1;
-					// Set usingIO to the process executing
-
-					p.setTimeRemaining(p.getBurst());
-	
-					// Set the timeRemaining for the process
-					// to the present burst time
-					p.setState("IO"); // Set the state to IO
-
-					dequeueIO(); // Remove the process from the ioQueue
-
-					System.out.println(
-						"Process " + p.getPid() + " has started IO.");
+					
+					dispatchIO();
 				}
 			}
-			
-
 
 			// Increment waiting times
-			for (Iterator i = cpuQueue.iterator(); i.hasNext();) {
-				Process p = (Process) i.next();
-				p.setWaitTime(p.getWaitTime() + 1);
-			}
-
-			for (Iterator i = ioQueue.iterator(); i.hasNext();) {
-				Process p = (Process) i.next();
-				p.setWaitTime(p.getWaitTime() + 1);
-			}
+			updateCPUWait();
+			updateIOWait();
 
 			// Decrement timeRemaining
-			if (usingCPU != -1) {
-				Process p = (Process) processList.get(usingCPU);
-				p.setTimeRemaining(p.getTimeRemaining() - 1);
-				System.out.println(
-					"Time Remaining/CPU: "
-						+ ((Process) processList.get(usingCPU)).getTimeRemaining());
-			}
-
-			if (usingIO != -1) {
-				((Process) processList.get(usingIO)).setTimeRemaining(
-					((Process) processList.get(usingIO)).getTimeRemaining() - 1);
-					//System.out.println("Time Remaining/IO: " + ((Process)processList.get(0)).getTimeRemaining());
-			}
-
+			updateCPUTR();
+			updateIOTR();
+			
 			// Increment clock
 			clock++;
-			
+
 		} // End while() loop
 
 		for (Iterator i = processList.iterator(); i.hasNext();) {

@@ -3,7 +3,11 @@
  */
 public class Simulation {
 	public static void main(String[] args) {
-		String filename = new String(args.toString());
+		if (args.length == 0) {
+			System.err.println("Usage: Simulation <filename>");
+			System.exit(1);
+		}
+		String filename = args[0];
 		Scheduler scheduler;
 				
 		FileReader reader = new FileReader();
