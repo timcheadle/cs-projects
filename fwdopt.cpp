@@ -64,7 +64,7 @@ next_hops stack::optimize_routes(byte source)
 		// Now go to all of it's neighbors
 		for(int v = 1; v <= nnets; v++) {
 			// links[v] will be > 0 if v is a neighbor to u
-			if (links[u] > 0) {
+			if (links[u][v] > 0) {
 				// If v's current distance is greater than the cost from u to v
 				// then set the new distance for v equal to that cost
 				if (dist[v] > cost(u, u, v)) {
