@@ -1,3 +1,5 @@
+<!-- Author: Tim Cheadle -->
+
 <project name="CS332 Homework 4" default="build">
 
 	<property name="srcdir" value="./src"/>
