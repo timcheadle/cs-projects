@@ -6,25 +6,19 @@
  */
 package XMLApplet;
 
-import XMLApplet.Parser;
+import XMLApplet.*;
 import java.awt.*;
-import javax.swing.*;
+import java.applet.Applet;
 import java.util.*;
 import java.net.*;
 
 /**
  * @author session
  */
-public class XMLApplet extends JApplet {
+public class XMLApplet extends Applet {
 	private Parser p;
 	private String url;
 	private String filename;
-	
-	public void init() {
-		String message = "Pie Chart Applet";
-		JButton b1 = new JButton("Ages");
-		getContentPane().add(b1);
-	}
 	
 	public void start() {
 		// Construct the URL
@@ -48,24 +42,38 @@ public class XMLApplet extends JApplet {
 	
 	public void paint(Graphics g) {
 		Dimension d = getSize();
-		g.setColor(Color.gray);
+		g.setColor(new Color(40, 40, 40));
 		g.fillRect(0, 0, d.width, d.height);
-		g.setFont(new Font("Helvetica", Font.BOLD, 14));
-		g.setColor(new Color(0, 0, 128));
 		
 		HashMap ageHash = p.getAges();
-		Set ages = ageHash.keySet();
+		HashMap gpaHash = p.getGPAs();
+		HashMap majorHash = p.getMajors();
 		
-		Iterator i;
 		//g.drawString(getCodeBase() + "students.xml", 10, 10);
-		g.drawString(url, 10, 10);
+		g.setFont(new Font("Helvetica", Font.BOLD, 14));
+		g.setColor(Color.white);
+		g.drawString("Reading from: " + url, 10, 15);
 		
-		int y = 30;
-		for (i = ages.iterator(); y < d.height && i.hasNext(); y+=24) {
-				String key = i.next().toString();
-				String value = ageHash.get(key).toString();
-				g.drawString("key/value = " + key + "/" + value, 10, y);
-		}
+		// Ages chart
+		g.setFont(new Font("Helvetica", Font.BOLD, 14));
+		g.setColor(Color.white);
+		g.drawString("Ages", 10, 55);
+		PieChart ageChart = new PieChart(ageHash);
+		ageChart.draw(g, 40, 50, 100, 100, 10, 75);
+		
+		// GPAs chart
+		g.setFont(new Font("Helvetica", Font.BOLD, 14));
+		g.setColor(Color.white);
+		g.drawString("GPAs", 180, 55);
+		PieChart gpaChart = new PieChart(gpaHash);
+		gpaChart.draw(g, 220, 50, 100, 100, 180, 75);
+		
+		// Majors chart
+		g.setFont(new Font("Helvetica", Font.BOLD, 14));
+		g.setColor(Color.white);
+		g.drawString("Majors", 350, 55);
+		PieChart majorChart = new PieChart(majorHash);
+		majorChart.draw(g, 390, 50, 100, 100, 350, 75);
 	}
 
 	public static void main(String[] args) {
