@@ -6,7 +6,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: clock.c,v 1.1 2002-09-15 04:14:36 session Exp $
+ * $Id: clock.c,v 1.2 2002-09-15 05:12:58 session Exp $
  */
 
 #include <GL/gl.h>
@@ -14,9 +14,16 @@
 #include <GL/glut.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
+
+#define PI 3.141592654
 
 static GLfloat spin = 0.0;
 static GLint spinning = 0;
+static GLint raise_color = 1;
+static GLfloat radius = 35.0;
+static GLfloat red = 0.5, green = 0.5, blue = 0.5;
+static GLint divisions = 60;
 
 void init(void) 
 {
@@ -26,23 +33,70 @@ void init(void)
 
 void display(void)
 {
+	GLfloat angle = 0;
+	int i;
+	
 	glClear(GL_COLOR_BUFFER_BIT);
+	
+	glBegin(GL_LINE_STRIP);
+	glColor3f(red, green, blue);
+    glVertex2f(radius, 0);
+	for (i = 0; i <= divisions; i++) {
+		angle = (((double) i) / ((double) divisions)) * 2.0 * PI;
+		glVertex2f((radius * cos(angle)), (radius * sin(angle)));
+	}
+	glEnd();
+	
+	/* Draw the rectangle part of the clock hand */
 	glPushMatrix();
 	glRotatef(spin, 0.0, 0.0, 1.0);
-	glColor3f(0.8, 0.5, 0.5);
+	glColor3f(red, green, blue);
 	glRectf(0.0, 1.0, 30.0, -1.0);
+	glPopMatrix();
+	
+	/* Draw the triangle end of the clock hand */
+	glPushMatrix();
+	glRotatef(spin, 0.0, 0.0, 1.0);
+	glColor3f(red, green, blue);
+	glBegin(GL_TRIANGLES);
+		glVertex2f(30.0, 2.0);
+		glVertex2f(33.0, 0.0);
+		glVertex2f(30.0, -2.0);
+	glEnd();
 	glPopMatrix();
 	glutSwapBuffers();
 }
 
 void spinDisplay(void)
 {
+	seed(time());
 	time_t t = time(0);
-	spin = spin - (360/60); 
+	GLfloat change = 0.0005;
+	spin = spin - 0.03; /*(360/60); */
 	if (spin > 360.0)
 		spin = spin - 360.0;
-	while(t == time(0)) { }
+	/* while(t == time(0)) { } */
+	if (red < 1.0 && raise_color) {
+		raise_color = 1;
+	} else {
+		raise_color = 0;
+	}
+	if (red > 0.3 && !raise_color) {
+		raise_color = 0;
+	} else {
+		raise_color = 1;
+	}
+	if (raise_color) {
+		red += change*(rand()%10)/10.0;
+		green += change*(rand()%10)/10.0;
+		blue += change*(rand()%10)/10.0;
+	} else {
+		red -= change*(rand()%10)/10.0;
+		green -= change*(rand()%10)/10.0;
+		blue -= change*(rand()%10)/10.0;
+	}
 	glutPostRedisplay();
+	
 }
 
 void reshape(int w, int h)
