@@ -31,23 +31,19 @@ void network::create_topology ()
 //   to the row, to the number of interfaces on which the node has connections;
 // }. 
 //
+	int i, j, k;
 	int iface_counter = 1;  // counter to assign interface numbers local to each router
-	int total_ports = 0;  // counter for the total number of ports in the network
+	int total_interfaces = 0;  // counter for the total number of ports in the network
 
-	cout << "nnets: " << nnets << endl;
-
-	for (int i=1; i <= nnets; i++) {
+	for (i=1; i <= nnets; i++) {
 		iface_counter = 1;
-		cout << "row: " << i << endl;
-		for (int j=1; j <= nnets; j++) {
-			cout << "links at ["<<i<<"]["<<j<<"] = " << links[i][j] << endl;
-			cout << "\t col: " << j << endl;
+		for (j=1; j <= nnets; j++) {
 			if (!links[i][j]) {
 				exit_interfaces[i][j] = -1; // if interface doesn't exist, assign -1
 			} else {
 				exit_interfaces[i][j] = iface_counter++;
 				net_state_data[i]->nports++;
-				total_ports++;
+				total_interfaces++;
 			}
 		}
 	}
@@ -96,10 +92,8 @@ void network::create_topology ()
 //
 	int index = 0; // assign global interface numbers to each interface
 	
-	cout << "total ports: " << total_ports << endl;
-	
-	for (int i=1; i <= nnets; i++) {
-		for (int j=1; j <= nnets; j++) {
+	for (i=1; i <= nnets; i++) {
+		for (j=1; j <= nnets; j++) {
 			if (exit_interfaces[i][j] > 0) {
 				interfaces[index].net = i;
 				interfaces[index].host = 1;
@@ -109,14 +103,14 @@ void network::create_topology ()
 		}
 	}
 	
-	for (int i=0; i < index; i++) { // for each column in interfaces
+	for (i=0; i < index; i++) { // for each column in interfaces
 		int router = interfaces[i].net;
 		int iface = interfaces[i].ifacenum;
-		for (int j = 1; j <= nnets; j++) { // for each column in exit_interfaces
+		for (j = 1; j <= nnets; j++) { // for each column in exit_interfaces
 			if (exit_interfaces[router][j] == iface) {
 				int end_router = j;
 				int end_iface = exit_interfaces[j][router];
-				for (int k = 0; k < index; k++) {
+				for (k = 0; k < index; k++) {
 					if (interfaces[k].net == end_router && interfaces[k].ifacenum == end_iface) {
 						interfaces[i].other_end = k;
 					}
