@@ -32,7 +32,19 @@ public class Process {
 	/**
 	 * Constructor
 	 */
-	public Process(int timeArrive, int timeRemaining){
+	public Process(int pid){
+		this.pid = pid;
+		this.timeArrive = 0;
+		this.timeRemaining = 0;
+		this.burst = new ArrayList();
+		this.state = "idle";
+	}
+	
+	/**
+	 * Constructor
+	 */
+	public Process(int pid, int timeArrive, int timeRemaining){
+		this.pid = pid;
 		this.timeArrive = timeArrive;
 		this.timeRemaining = timeRemaining;
 		this.burst = new ArrayList();
@@ -49,6 +61,17 @@ public class Process {
 		else
 			return ((Integer)burst.get(0)).intValue();
 	}
+	
+	/**
+	* @return the value of the element at "index" of the burst queue.  This method
+	* will return -1 if the value of burst is null (if the burst queue is empty).
+	*/
+	public int getBurst(int index) {
+		if (burst.size() == 0)
+			return -1;
+		else
+			return ((Integer)burst.get(index)).intValue();
+	}
 
 	/**
 	 * @return the value of timeArrive.
@@ -63,6 +86,15 @@ public class Process {
 	 */
 	public int getTimeRemaining() {
 		return timeRemaining;
+	}
+	
+	/**
+	 * This method sets the value for timeRemaining.
+	 * 
+	 * @param i
+	 */
+	public void setTimeArrive(int i) {
+		timeArrive = i;
 	}
 
 	/**

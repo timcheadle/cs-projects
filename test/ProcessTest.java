@@ -14,7 +14,7 @@ public class ProcessTest extends TestCase {
 
 	public void testProcess() {
 		Process a = new Process();
-		Process b = new Process(100, 30);
+		Process b = new Process(1, 100, 30);
 		
 		assertTrue("Default Arrival Time should be 0", a.getTimeArrive() == 0);
 		assertTrue("Default Remaining Time should be 0", a.getTimeRemaining() == 0);
