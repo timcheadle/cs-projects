@@ -3,7 +3,7 @@
  * 
  * SWE432
  * Homework 8
- * $Date: 2003-11-13 05:20:39 $
+ * $Date: 2003-11-13 05:49:14 $
  */
 
 ////////////////////////////////////////////
@@ -43,6 +43,9 @@ public class H8_tcheadle extends HttpServlet {
 	// Regular expressions
 	private static String COLORREGEX = "^[a-fA-F0-9]{6}$";
 	private static String URLREGEX = "^http://\\S+(?:(?:gif)|(?:jpg)|(?:jpeg)|(?:png))$";
+	
+	// Directory to print HTML
+	private static String HTMLDIR = "/home/tcheadle/public_html/";
 
 	// Collection information
 	private String collectionName;
@@ -58,14 +61,19 @@ public class H8_tcheadle extends HttpServlet {
 	private class Photo {
 		String url;
 		String description;
+		boolean valid = false;
 		
 		public Photo(String url, String desc) {
 			this.url = url;
 			this.description = desc;
+			if (url != null && desc != null && url.matches(URLREGEX)) {
+				this.valid = true;
+			}
 		}
 		
 		public String getUrl() { return url; }
 		public String getDescription() { return description; }
+		public boolean isValid() { return valid; }
 	}
 
 	public void doPost (HttpServletRequest req, HttpServletResponse res)
@@ -75,99 +83,111 @@ public class H8_tcheadle extends HttpServlet {
 		collectionName = req.getParameter("collectionName");
 		collectionDescription = req.getParameter("collectionDescription");
 		indexPhoto = req.getParameter("indexPhoto");
-		bgColor = req.getParameter("bgCOlor");
+		bgColor = req.getParameter("bgColor");
 		for (int i=0; i < MAXPHOTOS; i++) {
 			String url = req.getParameter("photo" + i + "URL");
 			String desc = req.getParameter("photo" + i + "Description");
-			if (url != null && desc != null) {
-				photos.add(new Photo(url, desc));
-			}
+			photos.add(new Photo(url, desc));
 		}
 
 		validateParams();
 		generateHTML();
 	}
 
-	public boolean validateParams() {
+	private boolean validateParams() {
 		boolean valid = true;
 		
-		// Check to see if our strings are valid
+		// Check the collection name
 		if (collectionName == null) {
 			errors.add("Collection Name was blank; please enter a name for the collection.");
 			valid = false;
 		}
+		
+		// Make sure the index photo was specified and points to a valid photo
 		if (indexPhoto == null) {
 			errors.add("Index photo was not selected; please select which photo should be on the menu page.");
 			valid = false;
+		} else {
+			int index = Integer.parseInt(indexPhoto);
+			if (index < 1 || index > MAXPHOTOS) {
+				errors.add("Index Photo number needs to be between 1 and 20.");
+				valid = false;
+			} else if (!((Photo)photos.get(index)).isValid()) {
+				errors.add("Index Photo is an invalid photo; make sure URL is valid and description is not blank.");
+			}
+			
 		}
 		if (bgColor == null) {
 			errors.add("No background color was selected; please type a background color.");
 			valid = false;
-		}
-		if (!bgColor.matches(COLORREGEX)) {
+		} else if (!bgColor.matches(COLORREGEX)) {
 			errors.add("Background color needs to be in RRGGBB format.");
 			valid = false;
 		}
 		
 		// Check to see if each photo URL is valid
-		for (Iterator i = photos.iterator(); i.hasNext(); ) {
-			Photo p = (Photo)i.next();
-			if (!p.getUrl().matches(URLREGEX)) {
-				errors.add("'" + p.getUrl() + "' is not a valid URL.");
-				valid = false;
+		for (int i = 0; i < photos.size(); i++) {
+			Photo p = (Photo)photos.get(i);
+			if (!p.isValid()) {
+				if (p.getUrl() != null) {
+					errors.add("Photo " + i + " has an invalid URL.");
+					valid = false;
+				}
+				if (p.getUrl() == null && p.getDescription() != null) {
+					errors.add("Photo " + i + " has a description but no URL.");
+					valid = false;
+				}
+				if (p.getUrl() != null && p.getDescription() == null) {
+					errors.add("Photo " + i + " has a valid URL but no description.");
+					valid = false;
+				}
 			}
 		}
 		
 		return valid;
 	}
 	
-	
+	private void generateHTML() {
 		try {
-			if (images.size() > 0) {
-				writeIndexHTML(images, titles, collectionName, bgColor);
+			if (photos.size() > 0) {
+				writeIndexHTML();
 			}
 		} catch (IOException e) {
 			System.err.println("Could not write index.html: " + e.getMessage());
 		}
 
 		// If we actually found some images, print them out
-		for (int i = 0; i < images.size(); i++) {
+		for (int i = 0; i < photos.size(); i++) {
 			try {
 				// If we're at the first image, ignore the previous image
 				if (i == 0) {
 					writeOneHTML(
 						"",
-						(String)images.get(i),
-						(String)images.get(i + 1),
-						(String)titles.get(i),
-						collectionName,
-						bgColor
+						((Photo)photos.get(i)).getUrl(),
+						((Photo)photos.get(i + 1)).getUrl(),
+						((Photo)photos.get(i)).getDescription()
 					);
 				}
 				// If we at the last image, ignore the next image
-				else if (i == images.size() - 1) {
+				else if (i == photos.size() - 1) {
 					writeOneHTML(
-						(String)images.get(i - 1),
-						(String)images.get(i),
+						((Photo)photos.get(i - 1)).getUrl(),
+						((Photo)photos.get(i)).getUrl(),
 						"",
-						(String)titles.get(i),
-						collectionName,
-						bgColor
+						((Photo)photos.get(i)).getDescription()
 					);
 				}
 				// Otherwise, select the previous, current and next image
 				else {
 					writeOneHTML(
-						(String)images.get(i - 1),
-						(String)images.get(i),
-						(String)images.get(i + 1),
-						(String)titles.get(i),
-						collectionName,
-						bgColor
+						((Photo)photos.get(i - 1)).getUrl(),
+						((Photo)photos.get(i)).getUrl(),
+						((Photo)photos.get(i + 1)).getUrl(),
+						((Photo)photos.get(i)).getDescription()
 					);
 				}
 			} catch (IOException e) {
-				System.err.println("Could not write file for image '" + (String)images.get(i) + "': " + e.getMessage());
+				System.err.println("Could not write file for image '" + ((Photo)photos.get(i)).getUrl() + "': " + e.getMessage());
 			}
 		}
 	}
@@ -180,25 +200,20 @@ public class H8_tcheadle extends HttpServlet {
 	 * @param bgColor The background color for the index page
 	 * @throws IOException
 	 */
-	public static void writeIndexHTML(
-		ArrayList images,
-		ArrayList titles,
-		String name,
-		String bgColor
-	) throws IOException {
-		FileWriter fout = new FileWriter("index.html");
-		
+	private void writeIndexHTML() throws IOException {
+		FileWriter fout = new FileWriter(HTMLDIR + "index.html");
+	
 		fout.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2//EN\">\n");
 		fout.write("<html>\n");
 
 		fout.write("<head>\n");
-		fout.write("\t<title>" + name + "</title>\n");
+		fout.write("\t<title>" + collectionName + "</title>\n");
 		fout.write("</head>\n");
 
 		fout.write("<body BGColor=\"" + bgColor + "\">\n");
 
 		fout.write("<center>\n");
-		fout.write("<h1><i>" + name + "</i></h1>\n\n");
+		fout.write("<h1><i>" + collectionName + "</i></h1>\n\n");
 
 		fout.write("</center>\n\n");
 
@@ -207,9 +222,10 @@ public class H8_tcheadle extends HttpServlet {
 		fout.write("<td>\n");
 		fout.write("<ol>\n");
 
-		for (int i = 0; i < images.size(); i++) {
-			String imageName = parseName((String)images.get(i));
-			String imageTitle = (String)titles.get(i);
+		for (int i=0; i < photos.size(); i++) {
+			Photo p = (Photo)photos.get(i);
+			String imageName = parseName(p.getUrl());
+			String imageTitle = p.getDescription();
 			fout.write("<li><a HRef=\"" + imageName + ".html\">" + imageTitle + "</a>\n");
 		}
 
@@ -219,7 +235,7 @@ public class H8_tcheadle extends HttpServlet {
 		// Write the index picture (first picture in the array)
 		fout.write("<td>\n");
 		
-		String indexImageURL = (String)images.get(0);
+		String indexImageURL = ((Photo)photos.get(Integer.parseInt(indexPhoto))).getUrl();
 		fout.write("<img SRC=\"" + indexImageURL + "\" Height=200>\n");
 		fout.write("</td>\n");
 		fout.write("</tr>\n");
@@ -234,13 +250,11 @@ public class H8_tcheadle extends HttpServlet {
 	// ++++++++++++++++++++++++++++++++++++++++++++++++
 	// Creates an HTML page for the given picture name.
 	//
-	public static void writeOneHTML(
+	private void writeOneHTML(
 		String prev,
 		String cur,
 		String next,
-		String title,
-		String collectionName,
-		String bgColor
+		String title
 	) throws IOException {
 
 		// Parse image names from URLs
@@ -248,7 +262,7 @@ public class H8_tcheadle extends HttpServlet {
 		String curImageName  = parseName(cur);
 		String nextImageName = parseName(next);
 		
-		FileWriter fout = new FileWriter(curImageName + ".html");
+		FileWriter fout = new FileWriter(HTMLDIR + curImageName + ".html");
 
 		fout.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2//EN\">\n");
 		fout.write("<HTML>\n");
@@ -290,7 +304,7 @@ public class H8_tcheadle extends HttpServlet {
 		fout.close();
 	}
 	
-	private static String parseName(String url) {
+	private String parseName(String url) {
 		url = url.replaceAll(".*/", "");
 		url = url.replaceFirst(".[^.]+$", "");
 		return url;
