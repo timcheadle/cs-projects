@@ -51,9 +51,7 @@ public abstract class Scheduler {
 	protected abstract void dequeueCPU();
 	
 	/**
-	 * This method will enqueue a process on the IO device queue using the 
-	 * FCFS algorithm.
-	 *
+	 * This method will enqueue a process on the IO device queue.
 	 */
 	protected void enqueueIO(Process process) {
 		ioQueue.add(process);
@@ -61,9 +59,7 @@ public abstract class Scheduler {
 	}
 	
 	/**
-	 * This method will dequeue a process from the IO device queue using the
-	 * FCFS algorithm.
-	 *
+	 * This method will dequeue a process from the IO device queue.
 	 */
 	protected void dequeueIO() {
 		ioQueue.remove(0);

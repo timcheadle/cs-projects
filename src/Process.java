@@ -115,6 +115,10 @@ public class Process {
 		burst.add(new Integer(i));
 	}
 	
+	public void addFirstBurst(int i) {
+		burst.add(0, new Integer(i));
+	}
+	
 	/**
 	 * This method dequeues the first element of the burst queue.
 	 */
