@@ -9,6 +9,12 @@ import java.net.*;
  * XMLApplet is a simple applet to display pie charts of student data
  * that is stored in XML format.  It can also be run on the command line.
  * 
+ * In order to use the applet, the XML file must reside in the same directory
+ * as the applet itself.  The filename must either be "students.xml" or specified
+ * with the "data" parameter in the HTML.
+ * 
+ * To run on the command line, simply send the filename as a command line option.
+ * 
  * @author session
  */
 public class XMLApplet extends Applet {

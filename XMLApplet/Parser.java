@@ -11,6 +11,8 @@ import javax.xml.parsers.SAXParser;
  * Parser is the implementation of a simple SAX XML parser.  It will parse a file
  * of student elements and store their ages, majors and GPAs.
  * 
+ * It also provides a {@link ContentHandler} to parse the XML.
+ * 
  * @author Tim Cheadle
  */
 public class Parser extends DefaultHandler {
@@ -90,6 +92,11 @@ public class Parser extends DefaultHandler {
 		return gpas;
 	}
 	
+	/**
+	 * Called whenever an opening element is found.
+	 * 
+	 * @see org.xml.sax.ContentHandler#startElement(String, String, String, Attributes)
+	 */
 	public void startElement(
 		String namespaceURI,
 		String sName, // simple name
@@ -101,6 +108,11 @@ public class Parser extends DefaultHandler {
 		if (element.equals("")) element = qName;
 	}
 	
+	/**
+	 * Called whenever a closing element is found.
+	 * 
+	 * @see org.xml.sax.ContentHandler#endElement(String, String, String)
+	 */
 	public void endElement(
 		String namespaceURI,
 		String sName, // simple name
@@ -109,6 +121,11 @@ public class Parser extends DefaultHandler {
 		element = "";
 	}
 
+	/**
+	 * Called whenever characters inside an element are found.
+	 * 
+	 * @see org.xml.sax.ContentHandler#characters(char[], int, int)
+	 */
 	public void characters(char buf[], int offset, int len) throws SAXException {
 		String key = new String(buf, offset, len);
 		int value = 0;
