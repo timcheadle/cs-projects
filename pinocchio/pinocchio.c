@@ -1,16 +1,16 @@
 /*
- * pinnochio.c
+ * pinocchio.c
  *
  * Demo of opengl camera movement routines around a static
- * object (a model of pinnochio).
+ * object (a model of pinocchio).
  *
  * NOTE: To compile, use the attached Makefile, or following command:
- *       `gcc -lGL -lglut teapot.c -o teapot
+ *       `gcc -lGL -lglut pinocchio.c -o pinocchio
  *
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: pinocchio.c,v 1.3 2002-10-14 03:51:17 session Exp $
+ * $Id: pinocchio.c,v 1.4 2002-10-15 05:13:29 session Exp $
  */
 
 #include <GL/gl.h>
@@ -22,8 +22,9 @@
 
 #define PI 3.141592654
 
-static GLint spinning = 0; /* clock hand spinning on/off flag */
-static GLfloat angle = 0.0; /* angle of rotation to spin the teapot */
+static GLint horiz_spin = 0;
+static GLint vert_spin = 0;
+static GLfloat angle = 0.0; /* angle of rotation to spin the pinocchio */
 static GLfloat red   = 0.3, green = 0.9, blue  = 0.3; /* color of polygons */
 static GLfloat change = (1.0/60.0) * 2.0 * PI;
 static GLfloat radius = 30.0;
@@ -39,7 +40,7 @@ void init(void)
 }
 
 /*
- * Draw the teapot, making the necessary
+ * Draw the pinocchio, making the necessary
  * translations and rotations
  */
 void display(void)
@@ -110,7 +111,11 @@ void display(void)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);
-	gluLookAt(radius*cos(angle), 0.0, radius*sin(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	if (horiz_spin) {
+		gluLookAt(radius*cos(angle), 0.0, radius*sin(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	} else if (vert_spin) {
+		gluLookAt(radius*cos(angle), 0.0, radius*sin(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	}
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
@@ -118,13 +123,13 @@ void display(void)
 }
 
 /*
- * Update the angle of rotation for the teapot
+ * Update the angle of rotation for the pinocchio
  * every second if spinning is on
  */
-void spinCamera(void)
+void spinCamera(int temp)
 {
 	/* If the spinning flag is on, rotate clockwise by an angle (2 * PI)/60 radians */
-	if (spinning) {
+	if (horiz_spin || vert_spin) {
 		angle = (angle + change);
 		if (angle > 2*PI)
 			angle = angle - 2*PI;
@@ -155,12 +160,27 @@ void reshape(int w, int h)
 void keyboard(unsigned char key, int x, int y) 
 {
 	switch (key) {
-		case 'a':
-		case 'A':
+		case 'h':
+		case 'H':
 			/* toggle spinning flag on */
-			spinning = !spinning;
+			horiz_spin = 1;
+			vert_spin = 0;
+			break;
+
+		case 'v':
+		case 'V':
+			/* toggle spinning flag on */
+			vert_spin = 1;
+			horiz_spin = 0;
 			break;
 			
+		case 's':
+		case 'S':
+			/* toggle spinning flag on */
+			vert_spin = 0;
+			horiz_spin = 0;
+			break;
+
 		case 27: /* ESC key */
 			exit(0);
 			break;
