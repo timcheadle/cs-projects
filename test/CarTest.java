@@ -1,17 +1,16 @@
 import junit.framework.*;
 
-/*
- * Created on Apr 6, 2003
- *
- * To change this generated comment go to 
- * Window>Preferences>Java>Code Generation>Code Template
- */
-
 /**
- * @author session
+ * CarTest is a JUnit test suite for the Car class.
+ * 
+ * @author Tim Cheadle
  */
 public class CarTest extends TestCase {
-
+	/**
+	 * Constructs the test case.
+	 * 
+	 * @param name The name of the test case
+	 */
 	public CarTest(String name) {
 		super(name);
 	}
@@ -21,6 +20,7 @@ public class CarTest extends TestCase {
 	 * classes, and ensure that the correct ordering of attributes is taking place.
 	 */
 	public void testCompareTo() {
+		// Create two Car objects to compare
 		Car a = new Car(
 			"Mercedes-Benz",
 			"C230K",
@@ -62,6 +62,11 @@ public class CarTest extends TestCase {
 		assertTrue("Makes of cars should descend (A-Z alphabetically)", a.compareTo(b) > 0);
 	}
 	
+	/**
+	 * Creates the test suite.
+	 * 
+	 * @return The test suite
+	 */
 	public static Test suite() {
 		return new TestSuite(CarTest.class);
 	}

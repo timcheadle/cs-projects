@@ -3,10 +3,22 @@ import java.io.*;
 import Car;
 
 /**
- * @author session
+ * SortCars is a program that will both generate a file of car descriptions, as well as
+ * read in that file and print out a sorted version of the file.  Cars are generated randomly
+ * using a list of possible values for attributes such as make, model, colors, etc.
+ * 
+ * When the program is called in sorting mode, the sorted file is printed as filename.sorted.
+ * 
+ * @author Tim Cheadle
  */
 public class SortCars {
 
+	/**
+	 * Runs the SortCars program and checks command line arguments.  It calls the proper methods
+	 * based on the given arguments.
+	 * 
+	 * @param args Command line arguments
+	 */
 	public static void main(String[] args) {
 		String filename = "";
 		boolean generateFile = false;
@@ -18,7 +30,7 @@ public class SortCars {
 		}
 		
 		if (args[0].equals("-g") && args.length == 3) {
-			generateFile(args[1], args[2]);
+			generateFile(args[2], Integer.parseInt(args[1]));
 			return;
 		} else if (args[0].equals("-s") && args.length == 2) {
 			sortFile(args[1]);
@@ -29,6 +41,9 @@ public class SortCars {
 		}
 	}
 	
+	/**
+	 * Prints a usage statement describing how to run the program from the command line
+	 */
 	private static void usage() {
 		System.err.println("Usage: SortCars [-g <N>|-s] <filename>");
 		System.err.println("   -g <N>  Generate file with N cars");
@@ -36,9 +51,13 @@ public class SortCars {
 		System.err.println("   file    File to input (or output w/ -g)");
 	}
 	
-	private static void generateFile (String file, String n) {
-		int lines = Integer.parseInt(n);
-		
+	/**
+	 * Generates the file containing a random list of cars.
+	 * 
+	 * @param file The filename to output to
+	 * @param n The number of cars to generate
+	 */
+	private static void generateFile (String file, int n) {
 		Random r = new Random();
 		
 		// Set up arrays of characteristics
@@ -49,10 +68,11 @@ public class SortCars {
 		int hp[]        = {175, 189, 227, 240, 333, 459};
 		int torque[]    = {180, 200, 232, 310, 342, 510};
 		int cylinders[] = {4, 6, 8, 12};
-					
+		
+		// Try to write to the file			
 		try {
 			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
-			for (int i = 0; i < lines; i++) {
+			for (int i = 0; i < n; i++) {
 				// Create a new random car
 				Car c = new Car(
 					makes[r.nextInt(makes.length)],
@@ -73,16 +93,28 @@ public class SortCars {
 		}
 	}
 	
+	/**
+	 * Reads in a file containing car descriptions, sorts it, and prints the sorted list out.
+	 * 
+	 * @param file The filename to read (the output will be file+".sorted")
+	 */
 	private static void sortFile (String file) {
 		ArrayList cars = new ArrayList();
 		
 		try {
+			// Create a buffered reader to get a line of input
 			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
 			String line, word;
 			String delim = ",";
+			
+			// Read until the end of the file
 			while((line = in.readLine()) != null) {
+				// Break the line into tokens, comma delimited
 				StringTokenizer st = new StringTokenizer(line, delim);
+				
+				// While we have more tokens to read
 				while(st.hasMoreTokens()) {
+					// Read each token and create the attributes to place in the Car object
 					String make    = st.nextToken();
 					String model   = st.nextToken();
 					int modelYear  = Integer.parseInt(st.nextToken());
@@ -91,23 +123,27 @@ public class SortCars {
 					int torque     = Integer.parseInt(st.nextToken());
 					int cylinders  = Integer.parseInt(st.nextToken());
 					
+					// Create the new Car object and add it to the list
 					Car c = new Car(make, model, modelYear, color, horsepower, torque, cylinders);
 					cars.add(c);
 				}
 			}
 			
+			// Now create a buffered output object
 			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file + ".sorted")));
+			
+			// Sort the list of cars
 			Collections.sort(cars);
 			
+			// Now print the list of cars out
 			for(Iterator i = cars.iterator(); i.hasNext(); ) {
 				out.println(i.next().toString());
 			}
 			
+			// Close the output file
 			out.close();
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
-		
-
 	}
 }

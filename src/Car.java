@@ -230,7 +230,7 @@ public class Car implements Comparable {
 	 * 
 	 * @param string A make
 	 */
-	public void setManufacturer(String string) {
+	public void setMake(String string) {
 		make = string;
 	}
 
