@@ -3,7 +3,7 @@ import java.util.*;
  * @author Faye Wong
  *
  */
-public class Simulation {
+public class PsuedoSim {
 	int clock;		//Variable representing the present cycle of the CPU
 					//"clock".
 	

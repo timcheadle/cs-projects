@@ -6,40 +6,48 @@ import java.util.*;
  * The Process class represents a Process Control Block.  It contains the time
  * of Arrival for a process (timeArrive), the time remaining for a burst of the
  * process to complete (timeRemaining), a list of the different burst values 
- * (burst), and a boolean value (cpuBurstNext) to tell you what the type of the next 
- * burst is (CPU or IO).
- * 
- * The ArrayList "burst" acts as a queue of burst values.  Each time a burst 
- * executes on the CPU or IO device, it is dequeued from the list.  For 
- * preemptive scheduling, a burst may be put back onto the queue to wait until
- * the next time the process executes.
+ * (burst), a state value (state), and a process id (pid).  The ArrayList burst 
+ * acts as a queue of values of burst lengths.  It contains both CPU and IO bursts.
  */
 public class Process {
 	private int pid;				// process id
 	private String state;		
 	private int timeArrive;			// arrival time of the process
-	private int timeRemaining;		// remaining time that a *burst* has
-									// to execute
+	private int timeRemaining;		// remaining time that a *burst* has to execute
+	private int waitTime;			// time that the process has waited in the queue
 	private ArrayList burst;		// list of burst times
 						  
 	
 	
 	/**
 	 * Constructor
-	 * @return new Process object
 	 */
 	public Process(){
 		this.timeArrive = 0;
 		this.timeRemaining = 0;
-		this.burst = null;
-		
+		this.burst = new ArrayList();
+		this.state = "idle";
 	}
 	
 	/**
-	* @return the value of the first element of the burst queue.
+	 * Constructor
+	 */
+	public Process(int timeArrive, int timeRemaining){
+		this.timeArrive = timeArrive;
+		this.timeRemaining = timeRemaining;
+		this.burst = new ArrayList();
+		this.state = "idle";
+	}
+	
+	/**
+	* @return the value of the first element of the burst queue.  This method
+	* will return -1 if the value of burst is null (if the burst queue is empty).
 	*/
 	public int getBurst() {
-		return ((Integer)burst.get(0)).intValue();
+		if (burst.size() == 0)
+			return -1;
+		else
+			return ((Integer)burst.get(0)).intValue();
 	}
 
 	/**
@@ -82,14 +90,14 @@ public class Process {
 		burst.remove(0);
 	}
 	/**
-	 * @return
+	 * @return process id
 	 */
 	public int getPid() {
 		return pid;
 	}
 
 	/**
-	 * @return
+	 * @return state
 	 */
 	public String getState() {
 		return state;
@@ -107,6 +115,20 @@ public class Process {
 	 */
 	public void setState(String string) {
 		state = string;
+	}
+
+	/**
+	 * @return waitTime
+	 */
+	public int getWaitTime() {
+		return waitTime;
+	}
+
+	/**
+	 * @param waitTime
+	 */
+	public void setWaitTime(int waitTime) {
+		this.waitTime = waitTime;
 	}
 
 }
