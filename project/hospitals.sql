@@ -90,8 +90,8 @@ create table Out_Patient (
 
 drop table Scheduled_Visit;
 create table Scheduled_Visit (
-	Date date not null,
-	Comments text null,
+	Visit_Date date not null,
+	Comments varchar2(255) null,
 	Patient_Number int not null
 );
 
@@ -142,7 +142,7 @@ create table Patient_Item (
 
 drop table Medical_Surgical_Item;
 create table Medical_Surgical_Item (
-	Number int not null,
+	Item_Number int not null,
 	Name varchar2(32) not null,
 	Description varchar2(64) not null,
 	Cost numeric(10,2) not null
