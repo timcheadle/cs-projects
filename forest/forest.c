@@ -14,7 +14,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: forest.c,v 1.3 2002-12-08 02:27:44 session Exp $
+ * $Id: forest.c,v 1.4 2002-12-08 04:49:04 session Exp $
  */
 
 #include <GL/gl.h>
@@ -25,7 +25,9 @@
 #include <time.h>
 
 #define NUM_TREES 3000
-#define TEX_SCALE 50
+#define TEX_SCALE 1
+#define PI 3.141592654
+#define WIDTH 60
 
 static struct Tree {
 	float x;
@@ -33,6 +35,10 @@ static struct Tree {
 	float z;
 	float r;
 } trees[NUM_TREES];
+
+static GLint spinning = 1;
+static GLfloat spin = 0.0;
+static GLfloat delay = 1.0; /* Delay (in ms) between frame updates */
 
 
 /* Textures */
@@ -42,13 +48,13 @@ static GLuint texture, texture2;
 /*
  * Light properties
  */
-static GLfloat sun_x = 30.0;
-static GLfloat sun_y = 25.0;
-static GLfloat sun_z = 10.0;
+static GLfloat sun_x = 0.0;
+static GLfloat sun_y = WIDTH;
+static GLfloat sun_z = 0.0;
  
 static GLfloat light0_specular[]  = { 1.0, 1.0, 1.0, 1.0 };
 static GLfloat light0_shininess[] = { 100.0 };
-static GLfloat light0_position[]  = { 30.0, 25.0, 10.0, 1.0 };
+static GLfloat light0_position[]  = { 0.0, WIDTH, 0.0, 1.0 };
 static GLfloat light0_diffuse[] = { 0.8, 0.6, 0.6, 1.0 };
 static GLfloat light0_ambient[]   = { 0.4, 0.4, 0.4, 1.0 };
 static GLfloat light0_direction[] = { 0.0, -1.0, 0.0 };
@@ -66,24 +72,24 @@ static GLfloat floor_specular[] = { 0.2, 0.5, 0.8, 1.0 };
 static GLfloat high_shininess[] = { 100.0 };
 
 /* Trunk & branch properties */
-static GLfloat wood_diffuse[] = { 0.4, 0.8, 0.2, 1.0 };
-static GLfloat wood_ambient[] = { 0.4, 0.8, 0.2, 1.0 };
+static GLfloat wood_diffuse[] = { 0.45, 0.85, 0.25, 1.0 };
+static GLfloat wood_ambient[] = { 0.45, 0.85, 0.25, 1.0 };
 static GLfloat wood_specular[] = { 0.5, 0.7, 0.1, 1.0 };
 	
 /* Sun sphere properties */
 static GLfloat sun_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
 static GLfloat sun_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
 static GLfloat sun_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-static GLfloat sun_emission[] = { 0.3, 0.3, 0.3, 1.0 };
+static GLfloat sun_emission[] = { 1.0, 1.0, 0.6, 1.0 };
 
 
 
 void generateTrees() {
 	/* Generate tree locations */
 	for(int i=0; i < NUM_TREES; i++) {
-		trees[i].x = (rand() % 1500)/10.0 - 100.0;
+		trees[i].x = (rand() % (WIDTH * 20))/10.0 - WIDTH;
 		trees[i].y = (rand() % 100)/10.0 + 2.0;
-		trees[i].z = (rand() % 1500)/10.0 - 100.0;
+		trees[i].z = (rand() % (WIDTH * 20))/10.0 - WIDTH;
 		trees[i].r = (rand() % 60)/100.0 + 0.1;
 	}
 }
@@ -148,7 +154,6 @@ GLuint LoadTextureRAW( const char * filename, int wrap )
 
 void loadTextures() {
 	texture = LoadTextureRAW("grass-tile.bmp", 1);
-	texture2 = LoadTextureRAW("gravel-tile.bmp", 1);
 }
 
 
@@ -162,24 +167,31 @@ void drawGround() {
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, floor_specular);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, high_shininess);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, no_mat);
-	glBegin(GL_POLYGON);
-		glTexCoord2f(TEX_SCALE, TEX_SCALE);
-		glNormal3i(0, 1, 0);
-		glVertex3i(-100, 0, -100);
-		
-		glTexCoord2f(TEX_SCALE, 0);
-		glNormal3i(0, 1, 0);
-		glVertex3i(50, 0, -100);
-		
-		glTexCoord2f(0, 0);
-		glNormal3i(0, 1, 0);
-		glVertex3i(50, 0, 50);
-		
-		glTexCoord2f(0, TEX_SCALE);
-		glNormal3i(0, 1, 0);
-		glVertex3i(-100, 0, 50);
-	glEnd();
 	glPopMatrix();
+	
+	for(int x = -WIDTH; x < WIDTH; x+=5) {
+		for(int z = -WIDTH; z < WIDTH; z+=5) {
+			glPushMatrix();
+			glBegin(GL_POLYGON);
+				glTexCoord2f(TEX_SCALE, TEX_SCALE);
+				glNormal3i(0, 1, 0);
+				glVertex3i(x, 0, z);
+			
+				glTexCoord2f(TEX_SCALE, 0);
+				glNormal3i(0, 1, 0);
+				glVertex3i(x+5, 0, z);
+			
+				glTexCoord2f(0, 0);
+				glNormal3i(0, 1, 0);
+				glVertex3i(x+5, 0, z+5);
+		
+				glTexCoord2f(0, TEX_SCALE);
+				glNormal3i(0, 1, 0);
+				glVertex3i(x, 0, z+5);
+			glEnd();
+			glPopMatrix();
+		}
+	}
 }
 
 
@@ -220,20 +232,37 @@ void drawSun() {
 	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);			// Set Up Sphere Mapping
 	glBindTexture( GL_TEXTURE_2D, texture2 );
 	
+	sun_x = light0_position[0];
+	sun_y = light0_position[1];
+	sun_z = light0_position[2];
+	
+	if (spin >= 0.0 && spin <= 90.0) {
+		GLfloat percent = ((90.0 - spin) / 90.0) + 0.4;
+		if (percent > 1.0) percent = 1.0;
+		
+		sun_emission[0] = percent;
+		sun_emission[1] = percent;
+		sun_emission[2] = percent - 0.6;
+	}
+	
 	glPushMatrix();
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, sun_ambient);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, sun_diffuse);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, sun_specular);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, high_shininess);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, sun_emission);
+	glRotatef(spin, -1.0, 0.0, 0.0);
 	glTranslatef(sun_x, sun_y + 5.0, sun_z);
 	gluSphere(q, 5.0, 60, 60); 
 	glPopMatrix();
 	
-	/* Reset light position */
-	light0_position[0] = sun_x;
-	light0_position[1] = sun_y;
-	light0_position[2] = sun_z;
+	
+	/* Move light position */
+	glPushMatrix();
+	glRotatef(spin, -1.0, 0.0, 0.0);
+	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
+	glPopMatrix();
+		
 	
 	glDisable(GL_TEXTURE_GEN_S);						// Disable Sphere Mapping
 	glDisable(GL_TEXTURE_GEN_T);						// Disable Sphere Mapping
@@ -241,6 +270,18 @@ void drawSun() {
 
 
 
+void updateSpin(int tmp) {
+	/* If the spinning flag is on, rotate clockwise by an angle (2 * PI)/60 radians */
+	if (spinning) {
+		GLfloat change = 2.5;
+		spin = spin + change;
+		if (spin > 360.0)
+			spin = spin - 360.0;
+		glutPostRedisplay();
+	}
+	/* Set another timer callback to rotate every second */
+	glutTimerFunc(delay, updateSpin, 1);
+}
 
 
 /*
@@ -260,6 +301,8 @@ void init(void)
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light0_specular);
 	glLightfv(GL_LIGHT0, GL_SHININESS, light0_shininess);
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light0_direction);
+	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 80.0);
+	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.5);
 	
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
@@ -287,6 +330,8 @@ void display(void)
 	drawTrees();
 	drawSun();
 	
+	printf("spin: %f\n", spin);
+	
 	glutSwapBuffers();
 	glDeleteTextures( 1, &texture );
 
@@ -301,7 +346,7 @@ void reshape(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(60.0, 1.5, 1.0, 400.0);
-	gluLookAt(35.0, 35.0, 35.0, 0.0, 20.0, 0.0, 0.0, 1.0, 0.0);	
+	gluLookAt(WIDTH, 25.0, WIDTH, 0.0, 20.0, 0.0, 0.0, 1.0, 0.0);	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -337,6 +382,7 @@ int main(int argc, char** argv)
 	glutDisplayFunc(display); 
 	glutReshapeFunc(reshape); 
 	glutKeyboardFunc(keyboard);
+	glutTimerFunc(delay, updateSpin, 1);
 	glutMainLoop();
 	return 0;
 }
