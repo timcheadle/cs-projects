@@ -1,0 +1,33 @@
+#!/bin/sh
+nwdir="/usr/local/nw42"
+# Compile script for Network Workbench
+# Copyright 1997-1999 J.M.Pullen/George Mason University
+# last changed 1-16-01 
+# shell program for Network Workbench
+#
+# script for use with Linux 2.2.6 or Red Hat Linux 6.0 and GNU g++
+#
+# there is is one substitution parameter, the project part name 
+#
+# cwkb partname
+#
+# this script is intended to be copied to and run in the user's
+# directory, which must also contain nwpxxxn.cpp and the stack module
+# (such as topo.cpp) being completed in the assignment, as well as 
+# input files wan.txt, lan.txt, mc.txt and emailn.txt (0 to 3 required 
+# depending on the project part). Output file diskout.txt will be 
+# generated in the same directory.
+#
+partno=$1
+if [ "$1" = "dlc3" ] || [ "$1" = "int3" ]; then
+oblib="wkbrd"
+else
+oblib="wkbud"
+fi
+g++ ${partno}.cpp -I${nwdir}/code -I. -L${nwdir}/redhat -l${oblib} -o NW${partno}
+if [ $? -eq 0 ]; then
+echo "compile successful, program in NW"${partno} 
+else
+echo "compile/link not successful"
+fi
+
