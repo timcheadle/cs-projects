@@ -1,44 +1,149 @@
+drop table Laboratory_Technician;
 create table Laboratory_Technician (
-	Technician_ID numeric(8),
-	Laboratory_ID int
+	Technician_ID numeric(9) not null,
+	Laboratory_ID int not null
 );
 
-create table Laboratory ();
+drop table Laboratory;
+create table Laboratory (
+	Laboratory_ID int not null,
+	Name varchar2(64) not null,
+	Location varchar2(32) not null
+);
 
-create table Zip_Code ();
+drop table Zip_Code;
+create table Zip_Code (
+	Zip numeric(5) not null,
+	City varchar2(32) not null,
+	State varchar2(2) not null
+);
 
-create table Employee ();
+drop table Employee;
+create table Employee (
+	Employeee_ID numeric(9) not null,
+	Date_Hired date not null,
+	Salary numeric(10,2) not null,
+	Employee_Type varchar2(10) not null
+);
 
-create table Staff ();
+drop table Staff;
+create table Staff (
+	Staff_ID numeric(9) not null,
+	Job_Class varchar2(10) not null
+);
 
-create table Personal_Information ();
+drop table Person;
+create table Person (
+	Person_ID numeric(9) not null,
+	FName varchar2(16) not null,
+	MInit char(1) null,
+	LName varchar2(32) not null,
+	Street varchar2(31) not null,
+	Zip numeric(5) not null,
+	Phone numeric(10) not null,
+	DOB date not null
+);
 
-create table Care_Center_Employee ();
+drop table Care_Center_Employee;
+create table Care_Center_Employee (
+	Employee_ID numeric(9) not null,
+	Care_Center_ID int not null,
+	Hours numeric(5,2) not null
+);
 
-create table Care_Center ();
+drop table Care_Center;
+create table Care_Center (
+	Nurse_In_Charge_ID numeric(9) not null,
+	Name varchar2(32) not null,
+	Care_Center_ID int not null
+);
 
-create table Volunteer ();
+drop table Volunteer;
+create table Volunteer (
+	Volunteer_ID numeric(9) not null,
+	Skill varchar2(32) not null
+);
 
-create table Registered_Nurse ();
+drop table Registered_Nurse;
+create table Registered_Nurse (
+	Nurse_ID numeric(9) not null
+);
 
-create table Nurse ();
+drop table Nurse;
+create table Nurse (
+	Nurse_ID numeric(9) not null,
+	Certification varchar2(10) not null
+);
 
-create table In_Patient ();
+drop table In_Patient;
+create table In_Patient (
+	Patient_Number int not null,
+	Admittance_Date date not null,
+	Bed_Number int not null,
+	Care_Center_ID int not null
+);
 
-create table Out_Patient ();
+drop table Out_Patient;
+create table Out_Patient (
+	Patient_Number int not null
+);
 
-create table Scheduled_Visit ();
+drop table Scheduled_Visit;
+create table Scheduled_Visit (
+	Date date not null,
+	Comments text null,
+	Patient_Number int not null
+);
 
-create table Physician ();
+drop table Physician;
+create table Physician (
+	Physician_ID numeric(9) not null,
+	Specialty varchar2(20) not null,
+	Pager_Number numeric(10) not null
+);
 
-create table Bed ();
+drop table Bed;
+create table Bed (
+	Bed_Number int not null,
+	Care_Center_ID int not null,
+	Room_Number int not null
+);
 
-create table Patient ();
+drop table Patient;
+create table Patient (
+	Patient_Number int not null,
+	Patient_Type char(1) not null,
+	Patient_ID numeric(9) not null,
+	Referred_Physician_ID numeric(9) not null
+);
 
-create table Treatment ();
+drop table Treatment;
+create table Treatment (
+	Name varchar2(32) not null,
+	Treatment_ID int not null
+);
 
-create table Patient_Treatment ();
+drop table Patient_Treatment;
+create table Patient_Treatment (
+	Patient_Number int not null,
+	Treatment_ID int not null,
+	Physician_ID numeric(9) not null,
+	Date_Time date not null,
+	Results varchar2(32) not null
+);
 
-create table Patient_Item ();
+drop table Patient_Item;
+create table Patient_Item (
+	Item_Number int not null,
+	Patient_Number int not null,
+	Date_Time date not null,
+	Quantity int not null
+);
 
-create table Medical_Surgical_Item ();
+drop table Medical_Surgical_Item;
+create table Medical_Surgical_Item (
+	Number int not null,
+	Name varchar2(32) not null,
+	Description varchar2(64) not null,
+	Cost numeric(10,2) not null
+);
