@@ -10,7 +10,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: pinocchio.c,v 1.1 2002-10-13 22:36:53 session Exp $
+ * $Id: pinocchio.c,v 1.2 2002-10-13 22:52:51 session Exp $
  */
 
 #include <GL/gl.h>
@@ -26,27 +26,14 @@ static GLint spinning = 0; /* clock hand spinning on/off flag */
 static GLfloat spin = 0.0; /* angle of rotation to spin the teapot */
 static GLfloat red   = 0.3, green = 0.9, blue  = 0.3; /* color of polygons */
 static GLfloat change = 0.1;
-static GLint solid = 1;
-	GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-	GLfloat mat_shininess[] = { 100.0 };
-	GLfloat light0_position[] = { 30.0, 90.0, 30.0, 0.0 };
-	GLfloat light0_ambient[] = { 0.0, 0.0, 1.0, 1.0 };
 
 /*
  * Initialize the window buffer
  */
 void init(void) 
 {
-
 	glClearColor (0.0, 0.0, 0.0, 0.0);
 	glShadeModel (GL_SMOOTH);
-
-	
-
-	
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_DEPTH_TEST);
 }
 
 /*
@@ -61,48 +48,63 @@ void display(void)
 	/* Clear the output color buffer) */
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	/* Hat */
+	glColor3f(0.3, 0.2, 0.9);
+	glPushMatrix();
+	glTranslatef(0.0, 75.0, 0.0);
+	glRotatef(-90.0, 1.0, 0.0, 0.0);
+	glutWireCone(20.0, 55.0, 30.0, 30.0);
+	glPopMatrix();
+	
 	/* Head */
 	glColor3f(0.3, 0.2, 0.9);
 	glPushMatrix();
-	glTranslatef(0.0, 70.0, 0.0);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
-	glutSolidSphere(20.0, 60.0, 60.0);
+	glTranslatef(0.0, 60.0, 0.0);
+	glutWireSphere(20.0, 30.0, 30.0);
 	glPopMatrix();
 	
 	/* Body */
 	glColor3f(0.3, 0.2, 0.9);
 	glPushMatrix();
 	glRotatef(spin, 0.2, 1.0, 1.0);
-	glScalef(40.0, 100.0, 20.0);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
-	if (solid) {
-		glutSolidCube(1.0);
-	} else {
-		glutWireCube(1.0);
-	}
+	glScalef(40.0, 80.0, 20.0);
+	glutWireCube(1.0);
 	glPopMatrix();
 
 	/* Left Leg */
 	glColor3f(0.3, 0.2, 0.9);
 	glPushMatrix();
-	glTranslatef(-15.0, -25.0, 10.0);
-	glRotatef(45.0, 1.0, 1.0, 0.0);
-	glScalef(10.0, 50.0, 10.0);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
-	if (solid) {
-		glutSolidCube(1.0);
-	} else {
-		glutWireCube(1.0);
-	}
+	glTranslatef(-15.0, -55.0, 15.0);
+	glRotatef(-45.0, 1.0, 0.0, 0.0);
+	glScalef(10.0, 60.0, 10.0);
+	glutWireCube(1.0);
+	glPopMatrix();
+	
+	/* Right Leg */
+	glColor3f(0.3, 0.2, 0.9);
+	glPushMatrix();
+	glTranslatef(15.0, -55.0, 15.0);
+	glRotatef(-45.0, 1.0, 0.0, 0.0);
+	glScalef(10.0, 60.0, 10.0);
+	glutWireCube(1.0);
+	glPopMatrix();
+	
+	/* Left Arm */
+	glColor3f(0.3, 0.2, 0.9);
+	glPushMatrix();
+	glTranslatef(-35.0, 0.0, 10.0);
+	glRotatef(30.0, 0.0, 1.0, 0.0);
+	glScalef(40.0, 10.0, 10.0);
+	glutWireCube(1.0);
+	glPopMatrix();
+	
+	/* Right Arm */
+	glColor3f(0.3, 0.2, 0.9);
+	glPushMatrix();
+	glTranslatef(35.0, 0.0, 10.0);
+	glRotatef(-30.0, 0.0, 1.0, 0.0);
+	glScalef(40.0, 10.0, 10.0);
+	glutWireCube(1.0);
 	glPopMatrix();
 	
 	
@@ -133,8 +135,8 @@ void reshape(int w, int h)
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-100.0, 100.0, -100.0, 100.0, -300.0, 300.0);
-	gluLookAt(0.0, 60.0, 60.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);
+	gluLookAt(90.0, 30.0, 60.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -171,11 +173,6 @@ void keyboard(unsigned char key, int x, int y)
 			break;
 		case 45:
 			change -= 1.0;
-			break;
-			
-		case 'w':
-		case 'W':
-			solid = !solid;
 			break;
 			
 		default:
