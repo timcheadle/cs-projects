@@ -1,15 +1,15 @@
-# Makefile for pinnochio.c
+# Makefile for pinocchio.c
 #
 # tim cheadle
 # tcheadle@gmu.edu
 #
-# $Id: Makefile,v 1.1 2002-10-13 18:21:34 session Exp $
+# $Id: Makefile,v 1.2 2002-10-15 06:48:28 session Exp $
 #
 GCC = gcc
 CFLAGS = -lGL -lglut
 
-all: pinnochio.c
-	${GCC} ${CFLAGS} pinnochio.c -o teapot
+all: pinocchio.c
+	${GCC} ${CFLAGS} pinocchio.c -o pinocchio
 
 clean:
-	rm -fr pinnochio core
+	rm -fr pinocchio core
