@@ -1,9 +1,3 @@
-/*
- * Created on Feb 19, 2003
- *
- * To change this generated comment go to 
- * Window>Preferences>Java>Code Generation>Code Template
- */
 package XMLApplet;
 
 import java.io.*;
@@ -11,11 +5,13 @@ import java.util.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.SAXParserFactory; 
-//import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 
 /**
- * @author session
+ * Parser is the implementation of a simple SAX XML parser.  It will parse a file
+ * of student elements and store their ages, majors and GPAs.
+ * 
+ * @author Tim Cheadle
  */
 public class Parser extends DefaultHandler {
 	
@@ -38,7 +34,9 @@ public class Parser extends DefaultHandler {
 	}
 	
 	/**
-	 * @param fileName The XML file to parse
+	 * Parses the XML and stores the data in the age/major/GPA hashes.
+	 * 
+	 * @param fileName XML file to parse
 	 */
 	public void parse (String fileName) {
 		// Use the default (non-validating) parser
@@ -53,6 +51,11 @@ public class Parser extends DefaultHandler {
 		}
 	}
 	
+	/**
+	 * Parses the XML and stores the data in the age/major/GPA hashes.
+	 * 
+	 * @param url {@link InputStream} to parse
+	 */
 	public void parse (InputStream url) {
 		// Use the default (non-validating) parser
 		SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -72,11 +75,17 @@ public class Parser extends DefaultHandler {
 	public HashMap getAges() {
 		return ages;
 	}
-
+	
+	/**
+	 * @return HashMap Hash with keys of different GPAs found and values of their occurences
+	 */
 	public HashMap getMajors() {
 		return majors;
 	}
 	
+	/**
+	 * @return HashMap Hash with keys of different Majors found and values of their occurences
+	 */
 	public HashMap getGPAs() {
 		return gpas;
 	}

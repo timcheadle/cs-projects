@@ -1,18 +1,14 @@
-/*
- * Created on Feb 20, 2003
- *
- * To change this generated comment go to 
- * Window>Preferences>Java>Code Generation>Code Template
- */
 package XMLApplet;
 
-import XMLApplet.*;
 import java.awt.*;
 import java.applet.Applet;
 import java.util.*;
 import java.net.*;
 
 /**
+ * XMLApplet is a simple applet to display pie charts of student data
+ * that is stored in XML format.  It can also be run on the command line.
+ * 
  * @author session
  */
 public class XMLApplet extends Applet {
@@ -20,6 +16,9 @@ public class XMLApplet extends Applet {
 	private String url;
 	private String filename;
 	
+	/**
+	 * Starts the Applet.
+	 */
 	public void start() {
 		// Construct the URL
 		filename = getParameter("data");
@@ -40,6 +39,9 @@ public class XMLApplet extends Applet {
 		}
 	}
 	
+	/**
+	 * Paints the <code>Component</code>
+	 */
 	public void paint(Graphics g) {
 		Dimension d = getSize();
 		g.setColor(new Color(40, 40, 40));
@@ -76,6 +78,11 @@ public class XMLApplet extends Applet {
 		majorChart.draw(g, 390, 50, 100, 100, 350, 75);
 	}
 
+	/** 
+	 * Run on the command line if needed.
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		Parser p = new Parser();
 		p.parse(args[0]);
