@@ -3,7 +3,7 @@
 #include "nw.h"
 #endif
 // insert your name in the function below
-char* stack::ls_author(){return " ";}
+char* stack::ls_author(){return "Tim Cheadle";}
 // Copyright 1997-1999 J.M.Pullen/George Mason University
 // list server module for Network Workbench
 //*****************************************************************************
@@ -32,8 +32,54 @@ void stack::list_server(message* incoming_message,host_state* this_host)
 //   invoke send_email using outgoing_message coded for best-effort 
 //   transport;  
 // }.
-  message outgoing_message = *incoming_message;
-// student code goes here: 
 
-  send_email(&outgoing_message,this_host,FALSE);  
+	int i, j;
+	int subscribing = 0;
+	char compare[9];
+
+	if (incoming_message->size >= 9) {
+		for(i=0; i < incoming_message->size; i++) {
+			if (
+					incoming_message->text[i] == subscribe_message[0] &&
+					incoming_message->text[i+1] == subscribe_message[1] &&
+					incoming_message->text[i+2] == subscribe_message[2] &&
+					incoming_message->text[i+3] == subscribe_message[3] &&
+					incoming_message->text[i+4] == subscribe_message[4] &&
+					incoming_message->text[i+5] == subscribe_message[5] &&
+					incoming_message->text[i+6] == subscribe_message[6] &&
+					incoming_message->text[i+7] == subscribe_message[7] &&
+					incoming_message->text[i+8] == subscribe_message[8]
+			   )
+			{
+				subscribing = 1;
+			}
+		}
+	}
+
+	// If it was a subscription request and we have more room on the list, add
+	// the new subscriber and increment the subscriber count
+	if (subscribing) {
+		if (server_list_count < LIST_SERVER_CAPACITY) {
+			list_server_addresses[server_list_count].net = incoming_message->source_net;
+			list_server_addresses[server_list_count].host = incoming_message->source_host;
+			/*
+			cout << "subscribing: " 
+				<< (int)list_server_addresses[server_list_count].net
+				<< "."
+				<< (int)list_server_addresses[server_list_count].host
+				<< endl;
+			*/
+			server_list_count++;
+		}
+		return;
+
+	// If they aren't trying to subscribe, forward the message to everyone on the list
+	} else {
+		for(j=0; j < server_list_count; j++) {
+			message outgoing_message = *incoming_message;
+			outgoing_message.dest_net = list_server_addresses[j].net;
+			outgoing_message.dest_host = list_server_addresses[j].host;
+			send_email(&outgoing_message,this_host,FALSE);  
+		}
+	}
 }
