@@ -1,8 +1,8 @@
 /*
  * forest.c
  *
- * Demo of opengl lighting and texture mapping.  Simulates a forest
- * with sun rotation.
+ * Demo of opengl lighting, fog and texture mapping.  Simulates a
+ * forest with sun rotation.
  *
  * NOTE: To compile, use the attached Makefile, or following command:
  *       `gcc -lGL -lglut forest.c -o forest`
@@ -15,7 +15,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: forest.c,v 1.7 2002-12-09 04:39:38 session Exp $
+ * $Id: forest.c,v 1.8 2002-12-09 04:40:49 session Exp $
  */
 
 #include <GL/gl.h>
@@ -305,6 +305,9 @@ void drawSun() {
 }
 
 
+/*
+ * Draws the fog
+ */
 void drawFog() {
 	GLfloat fogColor[4] = {0.5, 0.5, 0.5, 1.0};
 
