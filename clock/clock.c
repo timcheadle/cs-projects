@@ -3,10 +3,13 @@
  *
  * A simple 2D simulation of a clock's second hand.
  *
+ * NOTE: To compile, use the attached Makefile, or following command:
+ *       `gcc -lGL -lglut clock.c -o clock`
+ *
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: clock.c,v 1.3 2002-09-24 05:56:36 session Exp $
+ * $Id: clock.c,v 1.4 2002-09-24 06:02:53 session Exp $
  */
 
 #include <GL/gl.h>
