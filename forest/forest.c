@@ -15,7 +15,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: forest.c,v 1.6 2002-12-09 04:28:02 session Exp $
+ * $Id: forest.c,v 1.7 2002-12-09 04:39:38 session Exp $
  */
 
 #include <GL/gl.h>
@@ -46,6 +46,8 @@ static GLfloat delay = 1.0; /* Delay (in ms) between frame updates */
 /* Textures */
 static GLuint texture, texture2; 
 
+/* Fog density */
+static GLfloat density = 0.01;
 
 /*
  * Light properties
@@ -85,6 +87,9 @@ static GLfloat sun_specular[] = { 1.0, 1.0, 1.0, 1.0 };
 static GLfloat sun_emission[] = { 1.0, 1.0, 0.6, 1.0 };
 
 
+/*
+ * Loads the tree data structure from a file
+ */
 void loadTrees() {
 	FILE *file;
 	
@@ -106,18 +111,6 @@ void loadTrees() {
 	
 	fclose(file);
 }
-
-void generateTrees() {
-	/* Generate tree locations */
-	for(int i=0; i < NUM_TREES; i++) {
-		trees[i].x = (rand() % (WIDTH * 20))/10.0 - WIDTH;
-		trees[i].y = (rand() % 100)/10.0 + 2.0;
-		trees[i].z = (rand() % (WIDTH * 20))/10.0 - WIDTH;
-		trees[i].r = (rand() % 60)/100.0 + 0.1;
-	}
-}
-
-
 
 
 /* load a 256x256 RGB .RAW file as a texture */
@@ -312,6 +305,18 @@ void drawSun() {
 }
 
 
+void drawFog() {
+	GLfloat fogColor[4] = {0.5, 0.5, 0.5, 1.0};
+
+	glFogi (GL_FOG_MODE, GL_EXP);
+	glFogfv (GL_FOG_COLOR, fogColor);
+	glFogf (GL_FOG_DENSITY, density);
+	glHint (GL_FOG_HINT, GL_DONT_CARE);
+	glFogf (GL_FOG_START, 1.0);
+	glFogf (GL_FOG_END, 5.0);
+}
+
+
 /* 
  * Update the angle of spin
  */
@@ -349,6 +354,8 @@ void init(void)
 	glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 80.0);
 	glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 2.5);
 	
+	glEnable(GL_FOG);
+	
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_DEPTH_TEST);
@@ -374,6 +381,7 @@ void display(void)
 	drawGround();
 	drawTrees();
 	drawSun();
+	drawFog();
 	
 	#ifdef DEBUG
 	printf("spin: %f\n", spin);
@@ -416,6 +424,16 @@ void keyboard(unsigned char key, int x, int y)
 			exit(0);
 			break;
 			
+		case '-':	
+			density -= 0.005;
+			display();
+			break;
+		
+		case '+':	
+			density += 0.005;
+			display();
+			break;
+		
 		case 's':
 		case 'S': /* Turn spinning on/off */
 			if (spinning)
