@@ -1,0 +1,109 @@
+Script started on Wed Feb 21 12:18:45 2001
+% cat proj1.a
+# $Id: typescript.proj1,v 1.1 2004-06-08 04:29:27 session Exp $
+#
+# tim cheadle
+# CS 265
+# professor nordstrom
+# project 1
+#
+# this program asks the user for a total number of numbers to add
+# up.  it then asks the user to enter each number (it does this for
+# however many numbers were requested in the previous step) and then
+# prints out the sum of all numbers entered.
+#
+
+
+#
+# data segment
+# - allocate memory for string constants
+#
+	.data
+header:	.asciiz "enter the number of numbers: "
+prompt:	.asciiz "enter a number: "
+answer:	.asciiz "the sum is: "
+endl:	.asciiz "\n"
+
+
+#
+# program segment
+# - give instructions to perform user input and summation of the numbers 
+#
+	.text
+	.globl main
+	
+main:	# get the number of numbers	
+	li $v0,4	# system service to print string
+	la $a0,header	# load prompt string	
+	syscall
+
+	li $v0,5	# read an integer from the user
+	syscall
+
+	# set up variables before starting loop
+	move $s0,$v0	# move that integer into storage
+	li $s1,0	# initialize sum to zero
+
+loop:	# loop through until done, summing up inputted nums
+	li $v0,4	# sys service to print
+	la $a0,prompt	# load prompt string
+	syscall
+
+	li $v0,5	# get a number from the user
+	syscall
+
+	add $s1,$s1,$v0	# add that number to the old sum
+	sub $s0,$s0,1	# decrement counter by 1
+
+	bnez $s0,loop	# loop if counter isn't zero
+
+	# print sum and finish up
+	li $v0,4	# sys service to print string
+	la $a0,answer	# load answer string as argument
+	syscall
+
+	li $v0,1	# sys service to print integer
+	move $a0,$s1	# load sum as argument
+	syscall
+
+	li $v0,4	# sys service to print string
+	la $a0,endl	# load EOL (\n) as argument
+	syscall
+
+	li $v0,10	# exit
+	syscall
+% 
+% spim
+SPIM Version 6.2 of January 11, 1999
+Copyright 1990-1998 by James R. Larus (larus@cs.wisc.edu).
+All Rights Reserved.
+See the file README for a full copyright notice.
+Loaded: /usr/local/spim_6.2/trap.handler
+(spim) load "proj1.a"
+(spim) run
+enter the number of numbers: 5
+enter a number: 372
+enter a number: 747
+enter a number: 27
+enter a number: -9033
+enter a number: 8
+the sum is: -7879
+(spim) 
+enter the number of numbers: 10
+enter a number: 1
+enter a number: 2
+enter a number: 3
+enter a number: 4
+enter a number: 5
+enter a number: 4
+enter a number: 6
+enter a number: 7
+enter a number: 2
+enter a number: 3
+the sum is: 37
+(spim) quit
+% exit
+% 
+script done on Wed Feb 21 12:19:46 2001
+
+script done on Wed Feb 21 12:19:46 2001

@@ -1,0 +1,91 @@
+script started on Wed Mar 14 12:45:13 2001
+% cat proj2.a
+#$Id: typescript.proj2,v 1.1 2004-06-08 04:29:27 session Exp $
+#
+# tim cheadle
+# CS 265
+# professor nordstrom
+# project 22
+#
+# This program asks the user to input a string.  It then returns
+# the string with the characters reversed.  It uses a stack to
+# perform this operation.
+#
+
+
+#
+# data segment
+# - allocate memory for string constants
+#
+        .data
+prompt: .asciiz "enter a string: "
+endl:   .asciiz "\n"
+buffer: .space 300
+
+#
+# program segment
+# - give instructions to perform user input and summation of the numbers
+#
+        .text
+        .globl main
+main:   # get the string from the user
+        li $v0,4           # system service to print string
+        la $a0,prompt      # load prompt string
+        syscall
+
+        li $v0,8           # read a string from the user
+        la $a0,buffer      # use buffer to store it
+        li $a1,300         # define buffer length (prevent overflow attacks)
+        syscall
+
+        # set up variables before starting loop
+        la $t0,buffer      # point register at the beginning of the string 
+
+reverse: # loop through until done, pushing characters (except NUL and \n) onto stack
+        lb $t1,($t0)       # grab a character from the string
+        beqz $t1,reset     # loop if counter isn't zero
+	beq $t1,'\n',reset # if it's a newline, dont add to stack
+        sub $sp,$sp,4      # move stack pointer
+        sw $t1,($sp)       # push character onto the stack
+	add $t0,$t0,1      # move the character pointer up one
+        j reverse          # repeat the reverse loop
+
+reset:  la $t0,buffer      # reset the character pointer to beginning of buffer
+
+store:  # pop off the stack and store the reversed string
+        lb $t1,($t0)       # grab a byte from the word
+        beqz $t1,print     # if string is done, branch and print result
+	beq $t1,'\n',print # if newline, dont pop from stack
+        lw $t1,($sp)       # grab a word from the stack
+        add $sp,$sp,4      # adjust the stack pointer
+        sb $t1,($t0)       # store char in string
+	add $t0,$t0,1      # move the char pointer up one
+        j store            # repeat the store loop
+
+print:  # print reversed string and finish up
+        li $v0,4           # sys service to print string
+        la $a0,buffer      # load result string as argument (\n should be a part of it)
+        syscall
+
+        li $v0,10          # exit
+        syscall
+
+
+
+% spim
+SPIM Version 6.2 of January 11, 1999
+Copyright 1990-1998 by James R. Larus (larus@cs.wisc.edu).
+All Rights Reserved.
+See the file README for a full copyright notice.
+Loaded: /usr/local/spim_6.2/trap.handler
+(spim) load "proj2.a"
+(spim) run
+enter a string: this is a string!
+!gnirts a si siht
+(spim) run
+enter a string: another one
+eno rehtona
+(spim) quit
+% exit
+% 
+script done on Wed Mar 14 12:45:45 2001

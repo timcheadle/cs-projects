@@ -1,0 +1,392 @@
+Script started on Sun Apr  8 22:30:41 2001
+% cat -n proj3.a
+     1	# $Id: typescript.proj3,v 1.1 2004-06-08 04:29:27 session Exp $
+     2	#
+     3	# tim cheadle
+     4	# CS 265
+     5	# professor nordstrom
+     6	# project 1
+     7	#
+     8	# this program will convert decimal values to any other radix up to 36
+     9	# and vice versa.  it asks the user which conversion they prefer, does
+    10	# the calculations, and prints the result.  the numbers are stored in
+    11	# ascii strings.
+    12	#
+    13	
+    14	
+    15	#
+    16	# data segment
+    17	# - allocate memory for string constants and input buffers
+    18	#
+    19			.data
+    20	prompt:		.asciiz "Choose:\n1) Decimal to other radix\n2) Other radix to decimal\n3) Quit\n--> "
+    21	what_value:	.asciiz "Convert what value: "
+    22	to_radix:	.asciiz "To what radix: "
+    23	from_radix:	.asciiz "From what radix: "
+    24	converting:	.asciiz "Converting number...\n"
+    25	error:		.asciiz "Invalid choice.\nGoodbye!\n\n"
+    26	endl:		.asciiz "\n"
+    27	other_num:	.space 200
+    28	new_num:	.space 200
+    29	
+    30	
+    31	
+    32	
+    33	#
+    34	# program segment
+    35	# - give instructions to perform user input and summation of the numbers 
+    36	#
+    37		.text
+    38		.globl main
+    39	
+    40	
+    41	#
+    42	# dec2x_input
+    43	#	-- Asks the user to input a decimal
+    44	#	   number and the radix to convert to
+    45	#
+    46	# PARAMS : none
+    47	# RETURNS: decimal number in $v0, radix in $v1
+    48	#
+    49	dec2x_input:
+    50		sub $sp,$sp,8	# move stack pointer
+    51		sw $ra,4($sp)	# store return addr
+    52		sw $fp,($sp)	# store frame pointer
+    53		move $fp,$sp	# point frame pointer to where stack pointer is
+    54	
+    55		li $v0,4	# load service to print what_value prompt
+    56		la $a0,what_value
+    57		syscall
+    58		
+    59		li $v0,5	# load service to read the decimal number
+    60		syscall
+    61		
+    62		move $t0,$v0	# save contents of decimal number
+    63		
+    64		li $v0,4	# load service to print to_radix prompt
+    65		la $a0,to_radix
+    66		syscall
+    67		
+    68		li $v0,5	# load service to read radix int from user
+    69		syscall
+    70		
+    71		move $v1,$v0	# move radix number to $v1
+    72		move $v0,$t0	# move decimal value to $v0
+    73		
+    74		lw $fp,($sp)	# restore frame pointer
+    75		lw $ra,4($sp)	# restore return address
+    76		add $sp,$sp,8	# move stack pointer back up
+    77		jr $ra		# exit proc
+    78	
+    79	
+    80	#
+    81	# x2dec_input
+    82	#	-- Asks the user to input a value in
+    83	#	   any radix up to 36 and what radix
+    84	#	   the value is in.
+    85	#
+    86	# PARAMS : none
+    87	# RETURNS: other value in other_num, radix in $v0
+    88	#
+    89	x2dec_input:
+    90		sub $sp,$sp,8	# move stack pointer
+    91		sw $ra,4($sp)	# store return addr
+    92		sw $fp,($sp)	# store frame pointer
+    93		move $fp,$sp	# point frame pointer to where stack pointer is
+    94	
+    95		li $v0,4	# load service to print what_value prompt
+    96		la $a0,what_value
+    97		syscall
+    98		
+    99		li $v0,8	# load service to read the other number string
+   100		la $a0,other_num
+   101		li $a1,200	# define buffer length to prevent overflow
+   102		syscall
+   103		
+   104		li $v0,4	# load service to print from_radix prompt
+   105		la $a0,from_radix
+   106		syscall
+   107		
+   108		li $v0,5	# load service to read radix int from user
+   109		syscall
+   110		
+   111		lw $fp,($sp)	# restore frame pointer
+   112		lw $ra,4($sp)	# restore return address
+   113		add $sp,$sp,8	# move stack pointer back up
+   114		jr $ra		# exit proc
+   115	
+   116	
+   117	
+   118	
+   119	
+   120	#
+   121	# dec2x_convert
+   122	#	-- Converts a number in decimal to radix x
+   123	#
+   124	# PARAMS :  8($fp) - decimal number
+   125	#          12($fp) - radix value to convert to
+   126	# RETURNS: new value in new_num
+   127	#
+   128	dec2x_convert:
+   129		sub $sp,$sp,8	# move stack pointer
+   130		sw $ra,4($sp)	# store return addr
+   131		sw $fp,($sp)	# store frame pointer
+   132		move $fp,$sp	# point frame pointer to where stack pointer is	
+   133	
+   134		lw $t1,12($fp)	# put radix param in $t1
+   135		lw $t2, 8($fp)	# put decimal num in $t2
+   136		
+   137		la $t0,new_num
+   138		
+   139	d2x_loop:
+   140		rem $t3,$t2,$t1	# mod the decimal number by the radix
+   141		div $t2,$t2,$t1	# divide the dec number by the radix
+   142	
+   143		# add appropriate prefix to turn ints to ascii
+   144		bge $t3,10,az_add
+   145		add $t3,$t3,48	# turn 0-9 to '0'-'9'
+   146		j cont
+   147		
+   148	az_add: add $t3,$t3,55	# turn 10-36 to 'A'-'Z'
+   149	
+   150	cont:	sb $t3,($t0)	# store the remainder
+   151	
+   152		add $t0,$t0,1	# add 1 to index counter	
+   153	
+   154		# check to see if loop is done
+   155		beqz $t2,d2x_done
+   156		j d2x_loop
+   157		
+   158	d2x_done:
+   159		li $t4,'\n'	# store end line in string
+   160		sb $t4,($t0)
+   161		add $t0,$t0,1
+   162		li $t4,0	# store null terminator in string
+   163		sb $t4,($t0)
+   164	
+   165		lw $fp,($sp)	# restore frame pointer
+   166		lw $ra,4($sp)	# restore return address
+   167		add $sp,$sp,8	# move stack pointer back up
+   168		jr $ra		# exit proc
+   169		
+   170		
+   171		
+   172	#
+   173	# reverse_string
+   174	#	-- Reverses the new_num string so the digits will be correct
+   175	#
+   176	# PARAMS : none
+   177	# RETURNS: reversed string in new_num
+   178	#
+   179	reverse_string:
+   180		sub $sp,$sp,8	# move stack pointer
+   181		sw $ra,4($sp)	# store return addr
+   182		sw $fp,($sp)	# store frame pointer
+   183		move $fp,$sp	# point frame pointer to where stack pointer is		
+   184	
+   185	        la $t0,new_num      # point register at the beginning of the string 	
+   186	d2x_reverse: # loop through until done, pushing characters (except NUL and \n) onto stack
+   187	        lb $t1,($t0)       # grab a character from the string
+   188		beq $t1,'\n',d2x_reset # if it's a newline, dont add to stack
+   189	        sub $sp,$sp,4      # move stack pointer
+   190	        sw $t1,($sp)       # push character onto the stack
+   191		add $t0,$t0,1      # move the character pointer up one
+   192	        j d2x_reverse          # repeat the reverse loop
+   193	
+   194	d2x_reset:  la $t0,new_num      # reset the character pointer to beginning of buffer
+   195	
+   196	d2x_store:  # pop off the stack and store the reversed string
+   197	        lb $t1,($t0)       # grab a byte from the word
+   198		beq $t1,'\n',d2x_return # if newline, dont pop from stack
+   199	        lw $t1,($sp)       # grab a word from the stack
+   200	        add $sp,$sp,4      # adjust the stack pointer
+   201	        sb $t1,($t0)       # store char in string
+   202		add $t0,$t0,1      # move the char pointer up one
+   203	        j d2x_store            # repeat the store loop
+   204		
+   205	d2x_return:
+   206		lw $fp,($sp)	# restore frame pointer
+   207		lw $ra,4($sp)	# restore return address
+   208		add $sp,$sp,8	# move stack pointer back up
+   209		jr $ra		# exit proc
+   210		
+   211	
+   212	
+   213	#
+   214	# x2dec_convert
+   215	#	-- Converts a number in radix x to decimal
+   216	#
+   217	# PARAMS : original value in other_num, radix on stack in $fp-4
+   218	# RETURNS: new value in $v0
+   219	#
+   220	x2dec_convert:
+   221		sub $sp,$sp,8	# move stack pointer
+   222		sw $ra,4($sp)	# store return addr
+   223		sw $fp,($sp)	# store frame pointer
+   224		move $fp,$sp	# point frame pointer to where stack pointer is	
+   225	
+   226		lw $t0,8($fp)	# put radix param in $t0
+   227		
+   228		li $t1,0	# initialize counter to zero
+   229		li $t2,0	# initialize total to zero
+   230		
+   231		la $t3,other_num
+   232		
+   233	x2d_loop: # loop while not end of string
+   234		lb $t4,($t3)		# grab a byte from the string
+   235		beq $t4,'\n',x2d_return	# if end of string, return
+   236		
+   237		bge $t4,'A',az_sub	# if digit is a letter, go to alpha_sub
+   238		sub $t4,$t4,48		# otherwise subtract 0x30 (turn to normal int)
+   239		j x2d_cont
+   240	
+   241	az_sub:	sub $t4,$t4,55		# if digit is a letter, subtract 0x41 (turn to normal int)
+   242	
+   243	x2d_cont:
+   244		mul $t2,$t2,$t0		# multiply total by radix
+   245		add $t2,$t2,$t4		# add new digit
+   246		add $t3,$t3,1		# increase index
+   247		j x2d_loop		# loop back
+   248		
+   249	x2d_return:
+   250		move $v0,$t2
+   251		lw $fp,($sp)	# restore frame pointer
+   252		lw $ra,4($sp)	# restore return address
+   253		add $sp,$sp,8	# move stack pointer back up
+   254		jr $ra		# exit proc
+   255		
+   256		
+   257		
+   258		
+   259	#
+   260	# main
+   261	#	-- Driving routine of program; presents a menu
+   262	#	   so the user can pick their conversion method,
+   263	#	   validates that input and drives the conversion.
+   264	#
+   265	# PARAMS : none
+   266	# RETURNS: none
+   267	#
+   268		
+   269	main:	# get the number of numbers	
+   270		li $v0,4	# system service to print string
+   271		la $a0,prompt	# load prompt string	
+   272		syscall
+   273	
+   274		li $v0,5	# read an integer from the user
+   275		syscall
+   276	
+   277		beq $v0,1,dec2x	# do dec -> radix x conversion if choice 1
+   278		beq $v0,2,x2dec # do radix x -> dec conversion if choice 1
+   279		beq $v0,3,exit	# quit if option 3
+   280		
+   281		li $v0,4	# service to print string
+   282		la $a0,error	# prints error if invalid input
+   283		syscall
+   284		j exit		# quit if invalid input
+   285		
+   286	dec2x:	# decimal -> radix x conversion routines
+   287		jal dec2x_input	# get values from user
+   288		
+   289		sub $sp,$sp,8	# move stack pointer
+   290		sw $v1,4($sp)	# store radix to convert to on stack
+   291		sw $v0,($sp)	# store decimal to convert on stack
+   292		
+   293		jal dec2x_convert	# convert dec -> x
+   294		
+   295		add $sp,$sp,8	# deallocate stack space
+   296		
+   297		jal reverse_string
+   298		
+   299		li $v0,4	# service to print new answer
+   300		la $a0,new_num
+   301		syscall
+   302		
+   303		li $v0,4
+   304		la $a0,endl
+   305		syscall
+   306		j exit		# quit when done
+   307		
+   308	
+   309	x2dec:	# radix x -> decimal conversion routines	
+   310		jal x2dec_input	# get values from user
+   311		
+   312		sub $sp,$sp,4	# move stack pointer
+   313		sw $v0,($sp)	# store radix to convert from on stack
+   314		
+   315		jal x2dec_convert	# convert x -> dec
+   316		
+   317		add $sp,$sp,4	# deallocate stack space
+   318		
+   319		move $t0,$v0	# store answer
+   320		
+   321		li $v0,1	# load service to print answer
+   322		move $a0,$t0	# print new number
+   323		syscall
+   324		
+   325		li $v0,4
+   326		la $a0,endl
+   327		syscall
+   328		j exit		# quit when done
+   329	
+   330	exit:	li $v0,10	# exit
+   331		syscall
+% 
+% spim
+SPIM Version 6.2 of January 11, 1999
+Copyright 1990-1998 by James R. Larus (larus@cs.wisc.edu).
+All Rights Reserved.
+See the file README for a full copyright notice.
+Loaded: /usr/local/spim_6.2/trap.handler
+(spim) load "proj3.a"
+(spim) run
+Choose:
+1) Decimal to other radix
+2) Other radix to decimal
+3) Quit
+--> 1
+Convert what value: 51365
+To what radix: 27
+2GCB
+
+(spim) run
+Choose:
+1) Decimal to other radix
+2) Other radix to decimal
+3) Quit
+--> 1
+Convert what value: 10245
+To what radix: 16
+2805
+
+(spim) run
+Choose:
+1) Decimal to other radix
+2) Other radix to decimal
+3) Quit
+--> 2
+Convert what value: G7LB3
+From what radix: 31
+15005398
+(spim) run
+Choose:
+1) Decimal to other radix
+2) Other radix to decimal
+3) Quit
+--> 2
+Convert what value: BEEF
+From what radix: 16
+48879
+(spim) run
+Choose:
+1) Decimal to other radix
+2) Other radix to decimal
+3) Quit
+--> 2
+Convert what value: HOOHA
+From what radix: 28
+10995302
+(spim) quit
+% exit
+% 
+script done on Sun Apr  8 22:32:28 2001
