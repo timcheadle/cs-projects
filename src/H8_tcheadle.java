@@ -3,30 +3,9 @@
  * 
  * SWE432
  * Homework 8
- * $Date: 2003-11-13 07:27:18 $
+ * $Date: 2003-11-13 08:08:21 $
  */
 
-////////////////////////////////////////////
-//
-// Create HTML files for each picture.
-// Instructions:
-//	1. Place this file in a directory with JPG files.
-//	2. Create a file named "H7-tcheadle-data.txt" that has
-//	   A) A date (or other string) that is printed on each page.
-//	   B) two lines for each JPG file:
-//		 i) names of the JPG files *WITHOUT* the extension.
-//		ii) A title for the picture
-//	3. Run MakeHTML; for each filename f in H7-tcheadle-data.txt,
-//	   it should create a file called "f.html".
-//	4. Create an index.html if desired.
-//
-//	Customizations:
-//	 * The default "HEIGHT" for pictures is PICTUREHEIGHT
-// Should be a JSP
-// Jeff Offutt, August 2001, update for titles Feb 2003
-//				update for date in the file, March 2003
-//
-///////////////////////////////////////////
 import java.io.*;
 import java.util.*;
 import javax.servlet.*;
@@ -46,11 +25,12 @@ public class H8_tcheadle extends HttpServlet {
 	
 	// Directory to print HTML
 	private static String HTMLDIR = "/home/student/tcheadle/public_html/";
-	private static String HTMLURL = "http://hermes.gmu.edu/~tcheadle/index.html";
+	private static String HTMLURL = "http://hermes.gmu.edu/~tcheadle/";
 
 	// Collection information
 	private String collectionName;
 	private String collectionDescription;
+	private String collectionDir;
 	private String indexPhoto;
 	private String bgColor;
 	private ArrayList photos;
@@ -103,9 +83,26 @@ public class H8_tcheadle extends HttpServlet {
 			}
 		}
 
+		// Now try and validate parameters... if everything
+		// goes smoothly, then generate the HTML and redirect to the collection
 		if (validateParams()) {
-			generateHTML();
-			res.sendRedirect(HTMLURL);
+			collectionDir = cleanUrl(collectionName) + "/";
+			
+			// Try to create the directories to store the collection, if
+			// necessary. If we were successful, generate the HTML and redirect
+			File f = new File(HTMLDIR + collectionDir);
+			if (!f.exists() && !f.isDirectory()) {
+				if (f.mkdirs()) {
+					generateHTML();
+					res.sendRedirect(res.encodeURL(HTMLURL + collectionDir));
+				} else {
+					errors.add("Could not create directory: " + HTMLDIR + collectionDir);
+					printErrors(res);
+				}
+			} else {
+				generateHTML();
+				res.sendRedirect(res.encodeURL(HTMLURL + collectionDir));
+			}			
 		} else {
 			printErrors(res);
 		}
@@ -145,8 +142,12 @@ public class H8_tcheadle extends HttpServlet {
 			if (index < 1 || index > MAXPHOTOS) {
 				errors.add("Index Photo number needs to be between 1 and 20.");
 				valid = false;
+			} else if (index > photos.size()) {
+				errors.add("Index Photo points to an invalid image");
+				valid = false;
 			} else if (!((Photo)photos.get(index - 1)).isValid()) {
 				errors.add("Index Photo is an invalid photo; make sure URL is valid and description is not blank.");
+				valid = false;
 			}
 			
 		}
@@ -234,7 +235,7 @@ public class H8_tcheadle extends HttpServlet {
 	 * @throws IOException
 	 */
 	private void writeIndexHTML() throws IOException {
-		FileWriter fout = new FileWriter(HTMLDIR + "index.html");
+		FileWriter fout = new FileWriter(HTMLDIR + collectionDir + "index.html");
 	
 		fout.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2//EN\">\n");
 		fout.write("<html>\n");
@@ -247,10 +248,10 @@ public class H8_tcheadle extends HttpServlet {
 
 		fout.write("<center>\n");
 		fout.write("<h1><i>" + collectionName + "</i></h1>\n\n");
-
+		fout.write("<p>" + collectionDescription + "</p><br>\n");
 		fout.write("</center>\n\n");
 
-		fout.write("<table width=100% border=1>\n");
+		fout.write("<table width=100%>\n");
 		fout.write("<tr>\n");
 		fout.write("<td>\n");
 		fout.write("<ol>\n");
@@ -268,7 +269,7 @@ public class H8_tcheadle extends HttpServlet {
 		// Write the index picture (first picture in the array)
 		fout.write("<td align=center>\n");
 		
-		String indexImageURL = ((Photo)photos.get(Integer.parseInt(indexPhoto))).getUrl();
+		String indexImageURL = ((Photo)photos.get(Integer.parseInt(indexPhoto) - 1)).getUrl();
 		fout.write("<img SRC=\"" + indexImageURL + "\" Height=200>\n");
 		fout.write("</td>\n");
 		fout.write("</tr>\n");
@@ -295,7 +296,7 @@ public class H8_tcheadle extends HttpServlet {
 		String curImageName  = parseName(cur);
 		String nextImageName = parseName(next);
 		
-		FileWriter fout = new FileWriter(HTMLDIR + curImageName + ".html");
+		FileWriter fout = new FileWriter(HTMLDIR + collectionDir + curImageName + ".html");
 
 		fout.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2//EN\">\n");
 		fout.write("<HTML>\n");
@@ -313,8 +314,8 @@ public class H8_tcheadle extends HttpServlet {
 		fout.write("\n");
 		fout.write("<P>\n");
 		fout.write(title + " - <i>" + collectionName + "</i>\n");
-		fout.write("\n");
-		fout.write("<TABLE Border=5 CellSpacing=15>\n");
+		fout.write("<p>\n");
+		fout.write("<TABLE Border=3 CellSpacing=15>\n");
 		fout.write(" <TR>\n");
 		if (prev.length() != 0)
 			fout.write("  <TD><A HREF=\"" + prevImageName + ".html\">Prev</A></TD>\n");
@@ -341,5 +342,11 @@ public class H8_tcheadle extends HttpServlet {
 		url = url.replaceAll(".*/", "");
 		url = url.replaceFirst(".[^.]+$", "");
 		return url;
+	}
+	
+	private String cleanUrl(String s) {
+		s = s.replaceAll("\\s+", "_");
+		s = s.replaceAll("/", "-");
+		return s;
 	}
 }
