@@ -1,18 +1,16 @@
-#!/bin/sh
-nwdir="/usr/local/nw42"
-# Compile script for Network Workbench
-# Copyright 1997-1999 J.M.Pullen/George Mason University
-# last changed 1-16-01 
+#!/usr/bin/sh
+nwdir="/home/courses/csnets/nw42"
+# last changed 11-7-99
 # shell program for Network Workbench
 #
-# script for use with Linux 2.2.6 or Red Hat Linux 6.0 and GNU g++
+# script works with all parts of the project
 #
-# there is is one substitution parameter, the project part name 
+# there is is one substitution parameter, the project name
 #
-# cwkb partname
+# to compile type "cwkb projname" for example "cwkb dlc1"
 #
-# this script is intended to be copied to and run in the user's
-# directory, which must also contain nwpxxxn.cpp and the stack module
+# this script is intended to run in the user's working
+# directory, which must also contain the project code module
 # (such as topo.cpp) being completed in the assignment, as well as 
 # input files wan.txt, lan.txt, mc.txt and emailn.txt (0 to 3 required 
 # depending on the project part). Output file diskout.txt will be 
@@ -24,7 +22,7 @@ oblib="wkbrd"
 else
 oblib="wkbud"
 fi
-g++-2.95 ${partno}.cpp -I${nwdir}/code -I. -L${nwdir}/redhat -l${oblib} -o NW${partno}
+CC ${partno}.cpp -compat -I${nwdir}/code -I. -L${nwdir}/sun -l${oblib} -misalign -o NW${partno}
 if [ $? -eq 0 ]; then
 echo "compile successful, program in NW"${partno} 
 else

@@ -31,16 +31,17 @@ byte network::forward_iface(subnet_state* this_net,byte destnet)
 next_hops stack::optimize_routes(byte source)
 {
 	next_hops nhops;
-	float dist[nnets+1];
-	int marked[nnets+1];
+	int i;
+	float *dist = new float[nnets+1];
+	int *marked = new int[nnets+1];
 	int all_marked = 0;
 
-	for (int i=1; i <= MAX_NETS; i++) {
+	for (i=1; i <= MAX_NETS; i++) {
 		// Initialize all next hops to be -1
 		nhops.router[i] = 0;
 	}
 
-	for (int i=1; i <= nnets; i++) {
+	for (i=1; i <= nnets; i++) {
 		// Initialize all distances to a huge number unless the hop is the source
 		dist[i] = (i == source) ? 0.0 : HUGEFLOAT;
 		// Initialize all hops as unmarked
