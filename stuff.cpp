@@ -76,7 +76,7 @@ void stack::unstuff(bit_frame* unstuffed_frame,bit_frame* stuffed_frame)
 	int one_count = 0;
 	int i_bitpos = 0;
 	int o_bitpos = 0;
-	bool end_frame = false;
+	int end_frame = 0;
 	
 	// Copy the first 8 bits into the output frame
 	// since we know it's the beginning of the input frame
@@ -113,7 +113,7 @@ void stack::unstuff(bit_frame* unstuffed_frame,bit_frame* stuffed_frame)
 					// at the end of the frame.  Copy over a 1 and then a tailing 0
 					unstuffed_frame->frame_bits[++o_bitpos] = next_bit;
 					unstuffed_frame->frame_bits[++o_bitpos] = 0;
-					end_frame = true;
+					end_frame = 1;
 				}
 			}
 		}
