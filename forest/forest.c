@@ -7,15 +7,16 @@
  * NOTE: To compile, use the attached Makefile, or following command:
  *       `gcc -lGL -lglut forest.c -o forest`
  *
- * USAGE: 'o' - turn the spotlight on/off
- *        '+' - increase spotlight cutoff angle by 5.0
- *        '-' - decrease spotlight cutoff angle by 5.0
+ * USAGE: 's' - turns sun rotation on/off
+ *        '+' - increase fog density by 0.005
+ *        '-' - decrease fog density by 0.005
+ *      ENTER - reload tree data file
  *        ESC - exit the demo
  *
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: forest.c,v 1.8 2002-12-09 04:40:49 session Exp $
+ * $Id: forest.c,v 1.9 2002-12-09 04:43:12 session Exp $
  */
 
 #include <GL/gl.h>
