@@ -5,6 +5,7 @@
 	<property name="srcdir" value="./src"/>
 	<property name="testdir" value="./test"/>
 	<property name="builddir" value="./build"/>
+	<property name="docdir" value="./doc"/>
 	<property name="junit" value="/usr/share/java"/>
 
 	<target name="build" description="Compile the source code">
@@ -37,4 +38,23 @@
 			<arg value="cars.txt"/>
 		</java>
 	</target>
+
+    <target name="javadoc">
+        <javadoc destdir="${docdir}" access="public" use="true" notree="false"
+            nonavbar="false" noindex="false" splitindex="true"
+            author="true" version="true" nodeprecatedlist="false"
+            nodeprecated="false"
+            sourcefiles="src/Car.java,src/SortCars.java,test/CarTest.java"
+            sourcepath="${srcdir};${testdir}" classpath="${builddir};${junit}/junit.jar">
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+        </javadoc>
+    </target>
 </project>

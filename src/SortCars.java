@@ -1,6 +1,5 @@
 import java.util.*;
 import java.io.*;
-import Car;
 
 /**
  * SortCars is a program that will both generate a file of car descriptions, as well as
