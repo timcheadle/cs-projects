@@ -10,7 +10,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: pinocchio.c,v 1.2 2002-10-13 22:52:51 session Exp $
+ * $Id: pinocchio.c,v 1.3 2002-10-14 03:51:17 session Exp $
  */
 
 #include <GL/gl.h>
@@ -23,9 +23,11 @@
 #define PI 3.141592654
 
 static GLint spinning = 0; /* clock hand spinning on/off flag */
-static GLfloat spin = 0.0; /* angle of rotation to spin the teapot */
+static GLfloat angle = 0.0; /* angle of rotation to spin the teapot */
 static GLfloat red   = 0.3, green = 0.9, blue  = 0.3; /* color of polygons */
-static GLfloat change = 0.1;
+static GLfloat change = (1.0/60.0) * 2.0 * PI;
+static GLfloat radius = 30.0;
+static GLfloat delay = 10.0;
 
 /*
  * Initialize the window buffer
@@ -42,9 +44,6 @@ void init(void)
  */
 void display(void)
 {
-	GLfloat angle = 0;
-	int i;
-	
 	/* Clear the output color buffer) */
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
@@ -66,7 +65,6 @@ void display(void)
 	/* Body */
 	glColor3f(0.3, 0.2, 0.9);
 	glPushMatrix();
-	glRotatef(spin, 0.2, 1.0, 1.0);
 	glScalef(40.0, 80.0, 20.0);
 	glutWireCube(1.0);
 	glPopMatrix();
@@ -107,24 +105,33 @@ void display(void)
 	glutWireCube(1.0);
 	glPopMatrix();
 	
-	
-	
 	glutSwapBuffers();
+	
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);
+	gluLookAt(radius*cos(angle), 0.0, radius*sin(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	
+	/*printf("angle: %f, radius: %f, change: %f, cos: %f, sin: %f\n", angle, radius, change, radius*cos(angle), radius*sin(angle));*/
 }
 
 /*
  * Update the angle of rotation for the teapot
  * every second if spinning is on
  */
-void spinDisplay(void)
+void spinCamera(void)
 {
 	/* If the spinning flag is on, rotate clockwise by an angle (2 * PI)/60 radians */
 	if (spinning) {
-		spin = spin - change; /*(360/60);*/
-		if (spin > 360.0)
-			spin = spin - 360.0;
+		angle = (angle + change);
+		if (angle > 2*PI)
+			angle = angle - 2*PI;
 		glutPostRedisplay();
 	}
+	
+	glutTimerFunc(delay, spinCamera, 1);
 }
 
 /*
@@ -136,7 +143,7 @@ void reshape(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);
-	gluLookAt(90.0, 30.0, 60.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+	gluLookAt(radius*cos(angle), 0.0, radius*sin(angle), 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -158,21 +165,11 @@ void keyboard(unsigned char key, int x, int y)
 			exit(0);
 			break;
 			
-		case 'f':
-		case 'F':
-			glShadeModel(GL_FLAT);
-			break;
-			
-		case 's':
-		case 'S':
-			glShadeModel(GL_SMOOTH);
-			break;
-			
 		case 43:
-			change += 1.0;
+			change *= 2.0;
 			break;
 		case 45:
-			change -= 1.0;
+			change /= 2.0;
 			break;
 			
 		default:
@@ -189,14 +186,15 @@ int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowSize (350, 350); 
+	glutInitWindowSize (450, 450); 
 	glutInitWindowPosition (100, 100);
 	glutCreateWindow (argv[0]);
 	init ();
 	glutDisplayFunc(display); 
 	glutReshapeFunc(reshape); 
 	glutKeyboardFunc(keyboard);
-	glutIdleFunc(spinDisplay);
+/*	glutIdleFunc(spinCamera);*/
+	glutTimerFunc(delay, spinCamera, 1);
 	glutMainLoop();
 	return 0;
 }
