@@ -65,3 +65,52 @@ alter table Book_Copies  add (foreign key (BranchId) references Library_Branch(B
 alter table Book_Loans   add (foreign key (BranchId) references Library_Branch(BranchId));
 
 alter table Book_Loans   add (foreign key (CardNo) references Borrower(CardNo));
+
+
+
+--
+-- SQL Queries
+--
+
+select No_Of_Copies
+	from Book_Copies, Library_Branch, Book
+	where Book_Copies.BranchId = Library_Branch.BranchId
+		and Book_Copies.BookId = Book.BookId
+		and Title = 'The Lost Tribes'
+		and BranchName = 'Sharpstown';
+
+select BranchName, No_Of_Copies
+	from Book_Copies, Library_Branch, Book
+	where Book_Copies.BranchId = Library_Branch.BranchId
+		and Book_Copies.BookId = Book.BookId
+		and Title = 'The Lost Tribes';
+
+(select Name from Borrower)
+	except (select Name
+		from Borrower, Book_Loans
+		where Borrower.CardNo = Book_Loans.CardNo);
+
+select Title, Borrower.Name, Borrower.Address
+	from Book, Borrower, Book_Loans, Library_Branch
+	where Borrower.CardNo = Book_Loans.CardNo
+		and Book_Loans.BranchId = Library_Branch.BranchId
+		and Book_Loans.BookId = Book.BookId
+		and BranchName = 'Sharpstown'
+		and DueDate = '08-APR-2003';
+
+select BranchName, count(Book_Loans.BranchId)
+	from Library_Branch, Book_Loans
+	group by Library_Branch.BranchId;
+
+select Name, Address, count(Book_Loans.CardNo)
+	from Borrower, Book_Loans
+	where Borrow.CardNo = Book_Loans.CardNo
+	having count(Book_Loans.CardNo) > 5;
+
+select Title, No_Of_Copies
+	from Book, Book_Copies, Library_Branch, Book_Authors
+	where Book.BookId = Book_Authors.BookId
+		and Book.BookId = Book_Copies.BookId
+		and Library_Branch.BranchId = Book_Copies.BranchId
+		and AuthorName like '%Stephen King%'
+		and BranchName = 'Central';
