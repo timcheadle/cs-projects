@@ -1,10 +1,11 @@
 /*
- * room.c
+ * forest.c
  *
- * Demo of opengl lighting.
+ * Demo of opengl lighting and texture mapping.  Simulates a forest
+ * with sun rotation.
  *
  * NOTE: To compile, use the attached Makefile, or following command:
- *       `gcc -lGL -lglut pinocchio.c -o pinocchio
+ *       `gcc -lGL -lglut forest.c -o forest`
  *
  * USAGE: 'o' - turn the spotlight on/off
  *        '+' - increase spotlight cutoff angle by 5.0
@@ -14,7 +15,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: forest.c,v 1.4 2002-12-08 04:49:04 session Exp $
+ * $Id: forest.c,v 1.5 2002-12-08 05:08:26 session Exp $
  */
 
 #include <GL/gl.h>
@@ -37,7 +38,7 @@ static struct Tree {
 } trees[NUM_TREES];
 
 static GLint spinning = 1;
-static GLfloat spin = 0.0;
+static GLfloat spin = 0.0; /* Angle of sun rotation */
 static GLfloat delay = 1.0; /* Delay (in ms) between frame updates */
 
 
@@ -151,13 +152,18 @@ GLuint LoadTextureRAW( const char * filename, int wrap )
 }
 
 
-
+/*
+ * Loads the required textures
+ */
 void loadTextures() {
 	texture = LoadTextureRAW("grass-tile.bmp", 1);
+	/*texture2 = LoadTextureRAW("gravel-tile.bmp", 1);*/
 }
 
 
-
+/*
+ * Draws the ground of the forest with texturing
+ */
 void drawGround() {
 	glBindTexture( GL_TEXTURE_2D, texture );
 
@@ -194,7 +200,9 @@ void drawGround() {
 	}
 }
 
-
+/*
+ * Draws the trees of the forest
+ */
 void drawTrees() {
 	glPushMatrix();
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, wood_ambient);
@@ -222,8 +230,9 @@ void drawTrees() {
 	}
 }
 
-
-
+/*
+ * Draws and rotates the sun
+ */
 void drawSun() {
 	GLUquadricObj *q = gluNewQuadric();
 	gluQuadricNormals(q, GL_SMOOTH);					// Generate Smooth Normals For The Quad
@@ -236,12 +245,24 @@ void drawSun() {
 	sun_y = light0_position[1];
 	sun_z = light0_position[2];
 	
+	/*
+	 * Make sun lighter/darker for sunset/sunrise
+	 */
 	if (spin >= 0.0 && spin <= 90.0) {
 		GLfloat percent = ((90.0 - spin) / 90.0) + 0.4;
 		if (percent > 1.0) percent = 1.0;
 		
 		sun_emission[0] = percent;
-		sun_emission[1] = percent;
+		sun_emission[1] = percent * 0.9;
+		sun_emission[2] = percent - 0.6;
+	}
+	
+	if (spin >= 270.0 && spin <= 360.0) {
+		GLfloat percent = ((spin - 270.0) / 90.0) + 0.4;
+		if (percent > 1.0) percent = 1.0;
+		
+		sun_emission[0] = percent;
+		sun_emission[1] = percent * 0.9;
 		sun_emission[2] = percent - 0.6;
 	}
 	
@@ -269,7 +290,9 @@ void drawSun() {
 }
 
 
-
+/* 
+ * Update the angle of spin
+ */
 void updateSpin(int tmp) {
 	/* If the spinning flag is on, rotate clockwise by an angle (2 * PI)/60 radians */
 	if (spinning) {
@@ -353,7 +376,7 @@ void reshape(int w, int h)
 
 
 /*
- * Handles keyboard input; turns spotlight on/off, changes cutoff angle, or exits
+ * Handles keyboard input
  */
 void keyboard(unsigned char key, int x, int y) 
 {
