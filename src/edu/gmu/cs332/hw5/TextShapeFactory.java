@@ -24,7 +24,7 @@ public class TextShapeFactory implements ShapeFactory {
 	/**
 	 * @see edu.gmu.cs332.hw5.shapes.ShapeFactory#getShape()
 	 */
-	public Shape getShape() {
+	public Shape makeShape() {
 		Shape shape = null;
 		ArrayList points = new ArrayList();
 		
