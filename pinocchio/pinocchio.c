@@ -7,10 +7,15 @@
  * NOTE: To compile, use the attached Makefile, or following command:
  *       `gcc -lGL -lglut pinocchio.c -o pinocchio
  *
+ * USAGE: 's' - start/stop the demo (turns rotation on/off)
+ *        '+' - increase rotation speed by 1.5x
+ *        '-' - decrease the rotation speed by 1.5x
+ *        ESC - exit the demo
+ *
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: pinocchio.c,v 1.5 2002-10-15 06:18:49 session Exp $
+ * $Id: pinocchio.c,v 1.6 2002-10-15 06:48:36 session Exp $
  */
 
 #include <GL/gl.h>
@@ -29,7 +34,7 @@ static GLint phase = 1; /* Phase of rotation demo
 static GLint rotating = 0; /* Rotation on/off flag */
 static GLfloat angle = 0.0; /* angle of rotation to spin the camera */
 static GLfloat up_angle = 0.0; /* angle of rotation to move the camera's up vector */
-static GLfloat change = (1.0/360.0) * 2.0 * PI;
+static GLfloat change = (1.0/360.0) * 2.0 * PI; /* amount to increment the rotation angle each frame */
 static GLfloat radius = 30.0; /* Radius of circles of rotation */
 static GLfloat delay = 10.0; /* Delay (in ms) between frame updates */
 
@@ -38,8 +43,22 @@ static GLfloat delay = 10.0; /* Delay (in ms) between frame updates */
  */
 void init(void) 
 {
-	glClearColor (0.0, 0.0, 0.0, 0.0);
+	/* Add a positional light with a greenish-blue color */
+	GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat mat_shininess[] = { 100.0 };
+	GLfloat light0_position[] = { 0.0, 50.0, 500.0, 1.0 };
+	GLfloat light0_ambient[] = { 0.0, 0.8, 1.0, 1.0 };
+	glClearColor (0.0, 0.03, 0.05, 0.0);
 	glShadeModel (GL_SMOOTH);
+
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light0_ambient);
+	
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_DEPTH_TEST);
 }
 
 /*
@@ -56,21 +75,21 @@ void display(void)
 	glPushMatrix();
 	glTranslatef(0.0, 75.0, 0.0);
 	glRotatef(-90.0, 1.0, 0.0, 0.0);
-	glutWireCone(20.0, 55.0, 30.0, 30.0);
+	glutSolidCone(20.0, 55.0, 30.0, 30.0);
 	glPopMatrix();
 	
 	/* Head */
 	glColor3f(0.3, 0.2, 0.9);
 	glPushMatrix();
 	glTranslatef(0.0, 60.0, 0.0);
-	glutWireSphere(20.0, 30.0, 30.0);
+	glutSolidSphere(20.0, 30.0, 30.0);
 	glPopMatrix();
 	
 	/* Body */
 	glColor3f(0.3, 0.2, 0.9);
 	glPushMatrix();
 	glScalef(40.0, 80.0, 20.0);
-	glutWireCube(1.0);
+	glutSolidCube(1.0);
 	glPopMatrix();
 
 	/* Left Leg */
@@ -79,7 +98,7 @@ void display(void)
 	glTranslatef(-15.0, -55.0, 15.0);
 	glRotatef(-45.0, 1.0, 0.0, 0.0);
 	glScalef(10.0, 60.0, 10.0);
-	glutWireCube(1.0);
+	glutSolidCube(1.0);
 	glPopMatrix();
 	
 	/* Right Leg */
@@ -88,7 +107,7 @@ void display(void)
 	glTranslatef(15.0, -55.0, 15.0);
 	glRotatef(-45.0, 1.0, 0.0, 0.0);
 	glScalef(10.0, 60.0, 10.0);
-	glutWireCube(1.0);
+	glutSolidCube(1.0);
 	glPopMatrix();
 	
 	/* Left Arm */
@@ -97,7 +116,7 @@ void display(void)
 	glTranslatef(-35.0, 0.0, 10.0);
 	glRotatef(30.0, 0.0, 1.0, 0.0);
 	glScalef(40.0, 10.0, 10.0);
-	glutWireCube(1.0);
+	glutSolidCube(1.0);
 	glPopMatrix();
 	
 	/* Right Arm */
@@ -106,24 +125,25 @@ void display(void)
 	glTranslatef(35.0, 0.0, 10.0);
 	glRotatef(-30.0, 0.0, 1.0, 0.0);
 	glScalef(40.0, 10.0, 10.0);
-	glutWireCube(1.0);
+	glutSolidCube(1.0);
 	glPopMatrix();
 	
 	glutSwapBuffers();
-	
-	/*printf("angle: %f, radius: %f, change: %f, cos: %f, sin: %f\n", angle, radius, change, radius*cos(angle), radius*sin(angle));*/
 }
 
 /*
  * Update the angle of rotation for the pinocchio
- * every second if spinning is on
+ * every frame of rotation is on; then time off the next frame
  */
 void spinCamera(int temp)
 {
 	if (rotating) {
+	
+		/* update the angle of rotation for the circle */
 		angle = (angle + change);
 		if (angle > 2*PI) {
 			angle = angle - 2*PI;
+			/* switch directions if the circle of rotation is complete */
 			if (phase == 1) {
 				phase = 2;
 			} else if (phase == 2) {
@@ -137,6 +157,7 @@ void spinCamera(int temp)
 		glutPostRedisplay();
 	}
 	
+	/* reposition the camera with the updated angles */
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-200.0, 200.0, -200.0, 200.0, -300.0, 300.0);
@@ -148,6 +169,7 @@ void spinCamera(int temp)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
+	/* time off the next frame */
 	glutTimerFunc(delay, spinCamera, 1);
 }
 
@@ -185,7 +207,8 @@ void keyboard(unsigned char key, int x, int y)
 		case 27: /* ESC key */
 			exit(0);
 			break;
-			
+		
+		/* change how fast the rotation is */
 		case 43:
 			change *= 1.5;
 			break;
@@ -214,7 +237,6 @@ int main(int argc, char** argv)
 	glutDisplayFunc(display); 
 	glutReshapeFunc(reshape); 
 	glutKeyboardFunc(keyboard);
-/*	glutIdleFunc(spinCamera);*/
 	glutTimerFunc(delay, spinCamera, 1);
 	glutMainLoop();
 	return 0;
