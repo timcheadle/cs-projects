@@ -104,7 +104,7 @@ select BranchName, count(Book_Loans.BranchId)
 
 select Name, Address, count(Book_Loans.CardNo)
 	from Borrower, Book_Loans
-	where Borrow.CardNo = Book_Loans.CardNo
+	where Borrower.CardNo = Book_Loans.CardNo
 	having count(Book_Loans.CardNo) > 5;
 
 select Title, No_Of_Copies
