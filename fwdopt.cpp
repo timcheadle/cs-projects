@@ -31,21 +31,20 @@ byte network::forward_iface(subnet_state* this_net,byte destnet)
 next_hops stack::optimize_routes(byte source)
 {
 	next_hops nhops;
-	int i;
 	float dist[nnets+1];
-	bool marked[nnets+1];
-	bool all_marked = false;
+	int marked[nnets+1];
+	int all_marked = 0;
 
-	for (i=1; i <= MAX_NETS; i++) {
+	for (int i=1; i <= MAX_NETS; i++) {
 		// Initialize all next hops to be -1
 		nhops.router[i] = 0;
 	}
 
-	for (i=1; i <= nnets; i++) {
+	for (int i=1; i <= nnets; i++) {
 		// Initialize all distances to a huge number unless the hop is the source
 		dist[i] = (i == source) ? 0.0 : HUGEFLOAT;
 		// Initialize all hops as unmarked
-		marked[i] = false;
+		marked[i] = 0;
 	}
 
 	// Loop through until every node is marked
@@ -59,7 +58,7 @@ next_hops stack::optimize_routes(byte source)
 		}
 
 		// Mark u so we don't revisit it
-		marked[u] = true;
+		marked[u] = 1;
 
 		// Now go to all of it's neighbors
 		for(int v = 1; v <= nnets; v++) {
@@ -67,8 +66,8 @@ next_hops stack::optimize_routes(byte source)
 			if (links[u][v] > 0) {
 				// If v's current distance is greater than the cost from u to v
 				// then set the new distance for v equal to that cost
-				if (dist[v] > cost(u, u, v)) {
-					dist[v] = cost(u, u, v);
+				if (dist[v] > dist[u]+cost(u, u, v)) {
+					dist[v] = dist[u]+cost(u, u, v);
 					
 					// Now make the next hop to get to v equal to v if u is the source,
 					// or equal to nhops[u] if not
@@ -82,10 +81,10 @@ next_hops stack::optimize_routes(byte source)
 		}
 
 		// Now see if every node has been marked
-		all_marked = true;
-		for (i=1; i <= nnets; i++) {
-			if (marked[i] == false) {
-				all_marked = false;
+		all_marked = 1;
+		for (int i=1; i <= nnets; i++) {
+			if (!marked[i]) {
+				all_marked = 0;
 			}
 		}
 	}
