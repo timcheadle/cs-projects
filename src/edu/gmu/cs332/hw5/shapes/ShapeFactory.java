@@ -1,11 +1,17 @@
 package edu.gmu.cs332.hw5.shapes;
 
 /**
- * @author session
- *
- * To change the template for this generated type comment go to
- * Window>Preferences>Java>Code Generation>Code and Comments
+ * Provides a common interface through which to access shape factories, following the
+ * Abstract Factory design pattern.  This interface can be used to build concrete factories
+ * that allow different methods of shape creation.
+ *  
+ * @author Tim Cheadle
  */
 public interface ShapeFactory {
-	public Shape getShape();
+	/**
+	 * Generates a new shape.
+	 * 
+	 * @return A shape
+	 */
+	public Shape makeShape();
 }

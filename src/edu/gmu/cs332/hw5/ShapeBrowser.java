@@ -1,67 +1,57 @@
 package edu.gmu.cs332.hw5;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.io.*;
+import edu.gmu.cs332.hw5.shapes.*;
 
 /**
- * @author session
+ * This program reads in an input file containing information about shapes on each line
+ * and translates that file to a different format.
+ * 
+ * After completion, this program will also take these shapes and display them in a
+ * GUI browser/slideshow.
+ * 
+ * @author Tim Cheadle
  */
 public class ShapeBrowser {
-	private static String labelPrefix = "Number of button clicks: ";
-	private int numClicks = 0;
-
-	public Component createComponents() {
-		final JLabel label = new JLabel(labelPrefix + "0    ");
-
-		JButton button = new JButton("I'm a Swing button!");
-		button.setMnemonic(KeyEvent.VK_I);
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				numClicks++;
-				label.setText(labelPrefix + numClicks);
-			}
-		});
-		label.setLabelFor(button);
-
-		/*
-		 * An easy way to put space between a top-level container
-		 * and its contents is to put the contents in a JPanel
-		 * that has an "empty" border.
-		 */
-		JPanel pane = new JPanel();
-		pane.setBorder(BorderFactory.createEmptyBorder(
-										30, //top
-										30, //left
-										10, //bottom
-										30) //right
-										);
-		pane.setLayout(new GridLayout(0, 1));
-		pane.add(button);
-		pane.add(label);
-
-		return pane;
+	/**
+	 * Runs the main application; takes a filename as an argument.
+	 * 
+	 * @param args The filename to read shape from
+	 */
+	public static void main(String[] args) {
+		if (args.length == 0 || args.length >= 2) {
+			System.err.println("Usage: ShapeBrowser <filename>");
+			System.exit(1);
+		}
+		
+		String filename = args[0];
+		translateFile(filename);
 	}
 
-	public static void main(String args[]) {
+	/**
+	 * Reads the input file and creates new shape descriptions for each line.
+	 * 
+	 * @param filename The filename to read
+	 */
+	private static void translateFile(String filename) {
 		try {
-			UIManager.setLookAndFeel(
-				UIManager.getCrossPlatformLookAndFeelClassName());
-		} catch (Exception e) {}
-		
-		//Create the top-level container and add contents to it.
-		JFrame frame = new JFrame("SwingApplication");
-		ShapeBrowser app = new ShapeBrowser();
-		Component contents = app.createComponents();
-		frame.getContentPane().add(contents, BorderLayout.CENTER);
-
-		//Finish setting up the frame, and show it.
-		frame.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				System.exit(0);
+			BufferedReader in = new BufferedReader(new FileReader(filename));
+			String line = "";
+			
+			while((line = in.readLine()) != null) {
+				ShapeFactory sf = new TextShapeFactory(line);
+				Shape shape = sf.makeShape();
+				
+				if (shape != null) {
+					System.out.println(shape.toString());
+				} else {
+					System.out.println("Invalid line: " + line);
+				}
 			}
-		});
-		frame.pack();
-		frame.setVisible(true);
+			
+			in.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
