@@ -15,7 +15,7 @@
  * tim cheadle
  * tcheadle@gmu.edu
  *
- * $Id: forest.c,v 1.5 2002-12-08 05:08:26 session Exp $
+ * $Id: forest.c,v 1.6 2002-12-09 04:28:02 session Exp $
  */
 
 #include <GL/gl.h>
@@ -37,6 +37,7 @@ static struct Tree {
 	float r;
 } trees[NUM_TREES];
 
+static char *filename;
 static GLint spinning = 1;
 static GLfloat spin = 0.0; /* Angle of sun rotation */
 static GLfloat delay = 1.0; /* Delay (in ms) between frame updates */
@@ -84,6 +85,27 @@ static GLfloat sun_specular[] = { 1.0, 1.0, 1.0, 1.0 };
 static GLfloat sun_emission[] = { 1.0, 1.0, 0.6, 1.0 };
 
 
+void loadTrees() {
+	FILE *file;
+	
+	#ifdef DEBUG
+	printf("opening %s\n", filename);
+	#endif
+	
+	if ((file = fopen(filename, "r")) == NULL)
+           fprintf(stderr, "Cannot open %s\n", "output_file");
+	
+	int i=0;
+	while(!feof(file)) {
+		fscanf(file, "%f,%f,%f,%f\n", &trees[i].x, &trees[i].y, &trees[i].z, &trees[i].r);
+		#ifdef DEBUG
+		printf("%f,%f,%f,%f\n", trees[i].x, trees[i].y, trees[i].z, trees[i].r);
+		#endif
+		i++;
+	}
+	
+	fclose(file);
+}
 
 void generateTrees() {
 	/* Generate tree locations */
@@ -335,7 +357,7 @@ void init(void)
 	/* Seed the random table */
 	srand(time(NULL));
 	
-	generateTrees();
+	//generateTrees();
 }
 
 
@@ -353,7 +375,9 @@ void display(void)
 	drawTrees();
 	drawSun();
 	
+	#ifdef DEBUG
 	printf("spin: %f\n", spin);
+	#endif
 	
 	glutSwapBuffers();
 	glDeleteTextures( 1, &texture );
@@ -381,8 +405,23 @@ void reshape(int w, int h)
 void keyboard(unsigned char key, int x, int y) 
 {
 	switch (key) {
+		case 13: /* Enter key to reload file */
+			printf("Reloading file...\n");
+			loadTrees();
+			printf("Redrawing scene...\n");
+			display();
+			break;
+	
 		case 27: /* ESC key */
 			exit(0);
+			break;
+			
+		case 's':
+		case 'S': /* Turn spinning on/off */
+			if (spinning)
+				spinning = 0;
+			else
+				spinning = 1;
 			break;
 			
 		default:
@@ -394,13 +433,22 @@ void keyboard(unsigned char key, int x, int y)
  *  Request double buffer display mode and.
  *  register input and timer callback functions
  */
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize (600, 400); 
 	glutInitWindowPosition (100, 100);
 	glutCreateWindow (argv[0]);
+	
+	if (argc != 2) {
+		printf("Usage: %s <filename>\n", argv[0]);
+		exit(1);
+	}
+	
+	filename = argv[1];
+	loadTrees();
+	
 	init ();
 	glutDisplayFunc(display); 
 	glutReshapeFunc(reshape); 
