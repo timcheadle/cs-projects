@@ -7,12 +7,36 @@
 package XMLApplet;
 
 import XMLApplet.Parser;
+import java.awt.*;
+import java.applet.Applet;
 import java.util.*;
 
 /**
  * @author session
  */
-public class XMLApplet {
+public class XMLApplet extends Applet {
+
+	public void paint(Graphics g) {
+		Parser p = new Parser();
+		p.parse("/home/session/src/cs332/XMLApplet/students.xml");
+		
+		Dimension d = getSize();
+		g.setColor(Color.gray);
+		g.fillRect(0, 0, d.width, d.height);
+		g.setFont(new Font("Helvetica", Font.BOLD, 14));
+		g.setColor(new Color(0, 0, 128));
+		
+		HashMap ageHash = p.getAges();
+		Set ages = ageHash.keySet();
+		
+		Iterator i;
+		int y = 20;
+		for (i = ages.iterator(); y < d.height && i.hasNext(); y+=24) {
+				String key = i.next().toString();
+				String value = ageHash.get(key).toString();
+				g.drawString("key/value = " + key + "/" + value, 10, y);
+		}
+	}
 
 	public static void main(String[] args) {
 		Parser p = new Parser();

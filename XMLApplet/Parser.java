@@ -37,6 +37,9 @@ public class Parser extends DefaultHandler {
 		element = new String("");
 	}
 	
+	/**
+	 * @param fileName The XML file to parse
+	 */
 	public void parse (String fileName) {
 		// Use the default (non-validating) parser
 		SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -50,6 +53,9 @@ public class Parser extends DefaultHandler {
 		}
 	}
 	
+	/**
+	 * @return HashMap Hash with keys of different ages found and values of their occurences
+	 */
 	public HashMap getAges() {
 		return ages;
 	}
@@ -99,7 +105,6 @@ public class Parser extends DefaultHandler {
 			if (majors.containsKey(s) && (majors.get(s) != null)) {
 				value = ((Integer)majors.get(s)).intValue();
 			}
-			System.out.println("encountered major: " + s);
 			value++;
 			majors.put(s, new Integer(value));
 		} else if (element.equals("gpa")) {
