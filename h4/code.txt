@@ -1,0 +1,122 @@
+>> type matrix
+
+for i = 1 : n
+	sum = 0;
+	for j = 1 : n
+		a(i,j) = ((i-1)/(n-1))^(j-1);
+		sum = sum + a(i,j);
+	end
+	b(i) = sum;
+	b_alt1(i) = sum + ((-1)^i)*delta;
+	b_alt2(i) = sum + delta;
+end
+
+A = a;
+B = b;
+B_alt1 = b_alt1;
+B_alt2 = b_alt2;
+
+>> type gauss
+
+for  j = 1 : n-1
+	for i = j+1 : n
+		mult = a(i,j)/a(j,j);
+		for k = j+1 : n
+			a(i,k) = a(i,k) - mult*a(j,k);
+		end
+		b(i) = b(i) - mult*b(j);
+	end
+end
+
+>> type gauss_alt1
+
+for  j = 1 : n-1
+	for i = j+1 : n
+		mult = a(i,j)/a(j,j);
+		for k = j+1 : n
+			a(i,k) = a(i,k) - mult*a(j,k);
+		end
+		b_alt1(i) = b_alt1(i) - mult*b_alt1(j);
+	end
+end
+
+>> type gauss_alt2
+
+for  j = 1 : n-1
+	for i = j+1 : n
+		mult = a(i,j)/a(j,j);
+		for k = j+1 : n
+			a(i,k) = a(i,k) - mult*a(j,k);
+		end
+		b_alt2(i) = b_alt2(i) - mult*b_alt2(j);
+	end
+end
+
+>> type backsolve
+
+for i = n : -1 : 1
+	for j = i+1 : n
+		b(i) = b(i) - a(i,j)*x(j);
+	end
+	x(i) = b(i)/a(i,i);
+end
+
+>> type backsolve_alt1
+
+for i = n : -1 : 1
+	for j = i+1 : n
+		b_alt1(i) = b_alt1(i) - a(i,j)*x(j);
+	end
+	x_alt1(i) = b_alt1(i)/a(i,i);
+end
+
+>> type backsolve_alt2
+
+for i = n : -1 : 1
+	for j = i+1 : n
+		b_alt2(i) = b_alt2(i) - a(i,j)*x(j);
+	end
+	x_alt2(i) = b_alt2(i)/a(i,i);
+end
+
+>> type table
+
+max_bn1 = 0;
+max_bn2 = 0;
+max_bd = 0;
+max_xn1 = 0;
+max_xn2 = 0;
+max_xd = 0;
+
+bs1 = abs(B - B_alt1);
+xs1 = abs(x - x_alt1);
+bs2 = abs(B - B_alt2);
+xs2 = abs(x - x_alt2);
+
+for i = 1 : n
+	if bs1(i) > max_bn1
+		max_bn1 = bs1(i);
+	end
+	if xs1(i) > max_xn1
+		max_xn1 = xs1(i);
+	end
+	if bs2(i) > max_bn2
+		max_bn2 = bs2(i);
+	end
+	if xs2(i) > max_xn2
+		max_xn2 = xs2(i);
+	end
+	if abs(B(i)) > max_bd
+		max_bd = abs(B(i));
+	end
+	if abs(x(i)) > max_xd
+		max_xd = abs(x(i));
+	end
+end
+
+berror1 = max_bn1 / max_bd
+xerror1 = max_xn1 / max_xd
+berror2 = max_bn2 / max_bd
+xerror2 = max_xn2 / max_xd
+
+>> diary

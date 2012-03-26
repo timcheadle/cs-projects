@@ -1,0 +1,12 @@
+x = linspace(0, pi/2, 5);
+y = cos(x);
+splineplot(x,y);
+splineploterr(x,y)
+??? Undefined function or variable 'splineploterr'.
+
+splineploterr(x,y)
+??? Undefined function or variable 'splineploterr'.
+
+splineploterr(x,y)
+splineploterr(x,y)
+diary

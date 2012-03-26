@@ -1,0 +1,9 @@
+x = linspace(0, pi/2, 22);
+y = cos(x);
+splineploterr(x,y)
+
+ans =
+
+     8.156265929315509e-08
+
+diary

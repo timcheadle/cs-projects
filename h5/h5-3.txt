@@ -1,0 +1,9 @@
+n=9;
+ploterr
+max(abs(y-cos(x)))
+
+ans =
+
+   4.3988e-09
+
+diary off
