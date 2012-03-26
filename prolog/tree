@@ -1,0 +1,175 @@
+% tim cheadle
+% prolog fact/rule file
+% cs 330
+%
+% $Id: tree,v 1.1 2004-06-08 04:25:20 session Exp $
+%
+%
+
+%----------------------------
+% person() structure facts
+%----------------------------
+
+% Progenitor (1st generation)
+person([], f, nm(edna,mitcheltree), date(4,1899)).
+
+% Progenitor's children (2nd generation)
+person([1], m, nm(mary,shelton), date(4,1921)).
+person([2], f, nm(robert,mitcheltree), date(3,1926)).
+person([3], f, nm(edna,mitcheltree), date(11,1946)).
+
+% mary's [1] children (3rd generation)
+person([1,1], m, nm(jim,shelton), date(9,1945)).
+person([1,2], f, nm(judy,cheadle), date(4,1951)).
+person([1,3], m, nm(thomas,shelton), date(5,1951)).
+person([1,4], f, nm(evelyn,knight), date(5,1953)).
+
+% jim's [1,1] children (4th generation)
+person([1,1,1], m, nm(jimmy,shelton), date(7,1968)).
+person([1,1,2], m, nm(chris,shelton), date(9,1970)).
+
+% judy's [1,2] children (4th generation)
+person([1,2,1], m, nm(tim,cheadle), date(7,1981)).
+person([1,2,2], m, nm(matt,cheadle), date(8,1985)).
+
+% thomas' [1,3] children (4th generation)
+person([1,3,1], m, nm(tommy,shelton), date(9,1976)).
+person([1,3,2], f, nm(lisa,shelton), date(4,1979)).
+
+% evelyn's [1,4] children (4th generation)
+person([1,4,1], f, nm(kristin,knight), date(1,1988)).
+person([1,5,1], f, nm(kathryn,knight), date(7,1991)).
+
+% jimmy's [1,1,1] children (5th generation)
+person([1,1,1,1], m, nm(johnny,shelton), date(10,1995)).
+person([1,1,1,2], f, nm(christina,shelton), date(11,1999)).
+
+% tommy's [1,3,1] children (5th generation)
+person([1,3,1,1], f, nm(diana,shelton), date(12,1998)).
+
+% christina's [1,1,1,2] children (6th generation)
+person([1,1,1,2,1], m, nm(bobby,shelton), date(2,2020)).
+
+
+
+
+%----------------------------
+% Tree rules
+%----------------------------
+
+% differ(X,Y) accepts two ID's and checks to see
+% if they are different people.
+differ([X|_], [Y|_]) :- X =\= Y.
+differ([_|T1], [_|T2]) :- differ(T1,T2).
+
+% same(X,Y) accepts two ID's and checks to see
+% if they are the same person.
+same(X,Y) :-
+	append(X,_,Y),
+	append(Y,_,X).
+
+% parent(X,Y) accepts two nm()'s and checks to see
+% if person X's ID is a prefix of person Y's ID, and that
+% they differ in length only by one element
+parent(X,Y) :-
+	person(Xid,_,X,_),
+	person(Yid,_,Y,_),
+	append(Xid,[_],Yid).
+
+% older(X,Y) accepts two nm()'s and checks to see
+% if person X is older than person Y by first comparing
+% years of birth and if the years are equal, then
+% compare the months.
+older(X,Y) :- 
+	person(Xid,_,X,date(MonthX,YearX)),
+	person(Yid,_,Y,date(MonthY,YearY)),
+	differ(Xid,Yid),
+	(YearX < YearY ; YearX =:= YearY, MonthX < MonthY).
+
+older_more_recent(X,Y) :-
+	person(Xid,_,X,_),
+	person(Yid,_,Y,_),
+	older(X,Y),
+	length(Xid,NX), length(Yid,NY),
+	NX > NY.
+	
+
+% ancestor(X,Y) accepts two nm()'s and checks to
+% see if X is an ancestor of Y.  ancestry means that person X's ID
+% will be a prefix to the ID list of person Y so this rule
+% recursively checks each head element and then each tail.
+% it also makes sure the people differ (so a person is
+% not an ancestor of themselves).
+ancestor(X,Y) :-
+	person(Xid,_,X,_),
+	person(Yid,_,Y,_),
+	differ(Xid,Yid),
+	append(Xid,_,Yid).
+
+% descendent(X,Y) accepts two nm()'s and checks to see
+% if person Y is an ancestor of person X (meaning X is
+% descendent from Y).
+descendent(X,Y) :- ancestor(Y,X).
+
+% grandparent(X,Y) accepts two nm()'s and checks to see
+% if person X is the parent of person Z, and person Z is the
+% parent of person Y.
+grandparent(X,Y) :-
+	parent(X,Z),
+	parent(Z,Y).
+
+% ggrandparent(X,Y) accepts two nm()'s and checks to see
+% if person X is a great-grandparent of person Y by checking
+% if person X is a parent of person Z, and person Z is a grandparent
+% of person Y.
+ggrandparent(X,Y) :-
+	parent(X,Z),
+	grandparent(Z,Y).
+
+
+% first_cousin(X,Y) accepts two nm()'s and checks to see
+% if person X and person Y share the same grandparents
+first_cousin(X,Y) :-
+	person(Xid,_,X,_), person(Yid,_,Y,_),
+	differ(Xid,Yid),
+	parent(P1,X), parent(P2,Y),
+	person(P1id,_,P1,_), person(P2id,_,P2,_),
+	differ(P1id,P2id),
+	parent(Z,P1), parent(Z,P2).
+	
+% second_cousin(X,Y) accepts two nm()'s and checks to
+% see if person X and person Y have different
+% parents, different grandparents and the same
+% great grandparents
+second_cousin(X,Y) :-
+	person(Xid,m,X,_), person(Yid,_,Y,_),
+	differ(Xid,Yid),
+	parent(P1,X), parent(P2,Y),
+	person(P1id,_,P1,_), person(P2id,_,P2,_),
+	differ(P1id,P2id),
+	parent(G1,P1), parent(G2,P2),
+	person(G2id,_,G1,_), person(G2id,_,G2,_),
+	differ(G1id,G2id),
+	parent(Z,G1), parent(Z,G2).
+	
+% second_male_cousin(X,Y) accepts two nm()'s and checks to
+% see if X is male and X is Y's second cousin
+second_male_cousin(X,Y) :-
+	person(_,m,X,_),
+	second_cousin(X,Y).
+
+% second_once_removed(X,Y) accepts two nm()'s and checks to
+% see if X's parent is Y's second cousin
+second_once_removed(X,Y) :-
+	parent(Z,X),
+	second_cousin(Z,Y).
+
+% double_name(X,Y) accepts two nm()'s and checks to see if
+% X has two ancestors named Y
+double_name(X,Y) :-
+	person(Yid,_,Y,_),
+	ancestor(X,Y1),
+	person(Y1id,_,Y,_),
+	ancestor(X,Y2),
+	person(Y2id,_,Y,_),
+	differ(Y1id,Y2id).

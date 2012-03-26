@@ -1,0 +1,68 @@
+
+TAG:TITLE 
+    CS INTEGER:(330) Syllabus, F-INTEGER:(0)INTEGER:(0) (you should be able to get out numbers as
+integers)
+ENDTAG:TITLE
+
+TAG:HTML
+
+TAG:HEAD
+
+TAG:TITLE  
+    CSINTEGER:(330), Fall, INTEGER:(2001) - M. Smeltzer (you should be able to get out numbers
+as integers)
+ENDTAG:TITLE
+
+ENDTAG:HEAD
+
+
+should see seven tabs:							
+
+
+TAG:BODY
+
+<A NAME="TOP"> beginning is not a tag but the end is ENDTAG:A
+
+REAL:(-2345.34E-44)
+
+TAG:CENTER
+   TAG:B
+     <HINTEGER:(3)> 
+       center and B are tags. HINTEGER:(3) is not a tag coz of the INTEGER:(3).
+     </HINTEGER:(3)>
+   ENDTAG:B
+ENDTAG:CENTER
+
+<HELLOWORLD>
+       This is not a tag greater than INTEGER:(6)
+</HELLOWORLD>
+
+TAG:CENTER
+    Section INTEGER:(2):  W INTEGER:(4):INTEGER:(30) - INTEGER:(7):INTEGER:(10) p.m., DK INTEGER:(1006) (make sure it sees the
+numbers)
+ENDTAG:CENTER
+
+
+<HR COLOR="#REAL:(-21E11)"> Should point out real
+
+INTEGER:(0)INTEGER:(0)INTEGER:(0)INTEGER:(0)INTEGER:(0) (this should be determained as five seperate integer zeros.)
+
+
+ONE-LINE: <!-- <B><H3> single line </H3></B>-->
+
+<!-- TAG:B<HINTEGER:(3)> violating the single line -- because of the middle seperator
+</HINTEGER:(3)>ENDTAG:B-->
+
+
+MULTI-LINE: <!-- 
+	This is a Multiple Line comment
+-->
+
+
+
+ENDTAG:BODY
+
+ENDTAG:HTML
+BLANKS  : 145
+TABS    : 7
+NEWLINES: 63

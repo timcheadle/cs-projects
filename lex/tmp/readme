@@ -1,0 +1,110 @@
+$Id: readme,v 1.1 2004-06-08 04:25:20 session Exp $
+
+Lex Project
+CS 330
+Tim Cheadle
+
+This project was relatively simple once I got a grasp on lex/flex syntax.  I 
+used flex simply because it was free and also it had better documentation.
+
+The goal of this program was to take STDIN, parse it for some rules, and take
+the appropriate action when those rules were encountered.  The rules were 
+integer, reals, html tags, html comments, spaces, tabs, newlines, and 
+other (for anything that didn't match previous rules).  I decided to put the
+regular expressions for the rules as separate definitions, and simply refer
+to the definitions in the rule/action part of my lex program.
+
+To run this program, type:
+   make
+   ./a.out < DF
+
+where "DF" is your input file.
+
+------------------------------
+Explanation of rules:
+
+Integers:
+	I do not allow for leading zeroes.  I look for either a '0' by itself,
+	or an optional '+' or '-' sign, followed by a digit 1-9 and then zero
+	or more of digits 0-9.  This allows for "0", "-12", "123" and "+123",
+	but disallows "+000123".
+
+Reals:
+	Reals were similar to integers, however I allowed for leading zeroes
+	and trailing zeroes (it made the definition shorter and clearer).  To
+	find a real number, it looks for an optional '+' or '-', followed by
+	one or more digits 0-9, then followed by either a decimal point and one
+	or more digits 0-9, an exponent symbol 'E' followed by an optional sign
+	'+' or '-' and one or more digits 0-9, or a combination of both options.
+	This allows for "0.0", "+1.0", "-1.2", "6.02E23", "4.2E-89", and
+	"4.3E+9".
+
+Tag:
+	I used one definition for both start and end html tags, and used the
+	action code to determine which one was found.  It looks for anything
+	starting with a '<' and an optional '/', followed by one to six lower-
+	or upper-case letters and a '>'.  If the '/' was found, the tag is an
+	end-tag, and the characters inside are printed out (omitting the
+	brackets and slash).  If the '/' was not found, the tag is a start tag
+	and the characters inside are printed out (omitting the brackets).
+
+Comments:
+	This is the trickiest rule.  Since comments start with "<!--" and end
+	with "-->", but cannot have a "--" in the middiel, the regular
+	expression is somewhat cryptic.  It looks for a starting "<!--",
+	ending with "-->", and containing in the middle zero or more of the
+	pattern of an optional character (excluding '\n') and any character
+	except '-'.  This allows for comments to contain everything but a pair
+	of '-' characters in order, this eliminating "--" as a possibility.
+	
+	This works because if a '-' occurs once, it can only match the optional
+	first character, and MUST then be followed by a character other than
+	'-'.  Furthermore, the second character in that pattern allows for '\n'
+	so multi-line comments match as well.
+
+	In the action part of this rule, I test to see if the string inside the
+	"<!--" and "-->" contained any '\n' characters.  If so, the comment is
+	a multi-line one and this is printed out.  If not, the comment is only
+	one-line and this is printed out instead.
+
+Whitespace:
+	I declare counters for tabs, spaces and newlines at the beginning of the
+	program and initialize them to zero.  If a tab, newline or space is
+	encountered, the appropriate counter is incremented by one and the
+	character is echoed to STDOUT.  After the entire file has been parsed,
+	these counts are printed out.
+
+Other:
+	This rule matches any character (other than newline, which is matched
+	by the whitespace rules anyway) that doesn't match any of the previous
+	rules.  It MUST be the last rule in the lex program so it can serve as
+	a catch-all.  Otherwise, it would match everything and eliminate the
+	other rules as a possibility.  It echoes the matched characters to
+	STDOUT.
+
+
+------------------------------
+Explanation of Datafile (DF):
+
+My datafile contains every test against each rule.
+
+Integers:
+	Tests several integers, including "00000", "3", and "2001".  It also tests them inline
+	with other strings such as "H3" which prints out "HINTEGER:(3)".
+
+Reals:
+	It tests several reals such as "-21E11" and "-2345.34E-44".
+
+Tags:
+	It contains several tags such as "<B>" and "</CENTER>", as well as false tags such as
+	"<HELLOWORLD>".
+
+Comments:
+	It contains several one-line and multi-line comments, as well as false comments that
+	contain "--" in the middle.
+
+Whitespace:
+	It contains every example of whitespace (spaces/tabs/newlines).
+
+Other:
+	It contains characters not matched by other rules.
