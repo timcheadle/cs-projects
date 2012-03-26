@@ -1,0 +1,31 @@
+#!/usr/bin/sh
+nwdir="/home/courses/csnets/nw42"
+# last changed 11-7-99
+# shell program for Network Workbench
+#
+# script works with all parts of the project
+#
+# there is is one substitution parameter, the project name
+#
+# to compile type "cwkb projname" for example "cwkb dlc1"
+#
+# this script is intended to run in the user's working
+# directory, which must also contain the project code module
+# (such as topo.cpp) being completed in the assignment, as well as 
+# input files wan.txt, lan.txt, mc.txt and emailn.txt (0 to 3 required 
+# depending on the project part). Output file diskout.txt will be 
+# generated in the same directory.
+#
+partno=$1
+if [ "$1" = "dlc3" ] || [ "$1" = "int3" ]; then
+oblib="wkbrd"
+else
+oblib="wkbud"
+fi
+CC ${partno}.cpp -compat -I${nwdir}/code -I. -L${nwdir}/sun -l${oblib} -misalign -o NW${partno}
+if [ $? -eq 0 ]; then
+echo "compile successful, program in NW"${partno} 
+else
+echo "compile/link not successful"
+fi
+
