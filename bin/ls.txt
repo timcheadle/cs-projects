@@ -1,0 +1,4 @@
+command:  ls
+syntax:  ls <path>
+ 
+lists the files in the current working directory. If argument is passed, lists files in path.  You can also pass a java 1.4 regular expression to only display files that match in the current working directory

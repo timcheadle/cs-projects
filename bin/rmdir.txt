@@ -1,0 +1,4 @@
+command:  rmdir
+syntax:  rmdir <path>
+ 
+delete's directory at <path>

@@ -1,0 +1,4 @@
+command:  login
+syntax:  login
+ 
+validates a use login and returns the shell instance to be used

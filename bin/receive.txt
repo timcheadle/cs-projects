@@ -1,0 +1,4 @@
+command:  receive
+syntax:  receive
+ 
+display any messages in user's mailbox

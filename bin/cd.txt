@@ -1,0 +1,4 @@
+command:  cd
+syntax:  cd <directory>
+ 
+changes the working directory to argument provided
