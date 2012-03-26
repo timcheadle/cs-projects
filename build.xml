@@ -1,0 +1,60 @@
+<!-- Author: Tim Cheadle -->
+
+<project name="CS332 Homework 4" default="build">
+
+	<property name="srcdir" value="./src"/>
+	<property name="testdir" value="./test"/>
+	<property name="builddir" value="./build"/>
+	<property name="docdir" value="./doc"/>
+	<property name="junit" value="/usr/share/java"/>
+
+	<target name="build" description="Compile the source code">
+		<javac srcdir="${srcdir}"
+			destdir="${builddir}"
+			classpath="${srcdir}"/>
+		<javac srcdir="${testdir}"
+			destdir="${builddir}"
+			classpath="${srcdir};${testdir};${junit}\junit.jar"/>
+	</target>
+
+	<target name="test" depends="build" description="Run the JUnit tests">
+		<java classname="junit.textui.TestRunner"
+				classpath="${builddir};${junit}\junit.jar">
+			<arg value="CarTest"/>
+		</java>
+	</target>
+	<target name="genfile" depends="build" description="Generate a file of cars">
+		<java classname="SortCars"
+				classpath=".;${builddir}">
+			<arg value="-g"/>
+			<arg value="50"/>
+			<arg value="cars.txt"/>
+		</java>
+	</target>
+	<target name="sortfile" depends="build" description="Read and output the sorted list of cars">
+		<java classname="SortCars"
+				classpath=".;${builddir}">
+			<arg value="-s"/>
+			<arg value="cars.txt"/>
+		</java>
+	</target>
+
+    <target name="javadoc">
+        <javadoc destdir="${docdir}" access="public" use="true" notree="false"
+            nonavbar="false" noindex="false" splitindex="true"
+            author="true" version="true" nodeprecatedlist="false"
+            nodeprecated="false"
+            sourcefiles="src/Car.java,src/SortCars.java,test/CarTest.java"
+            sourcepath="${srcdir};${testdir}" classpath="${builddir};${junit}/junit.jar">
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api"/>
+        </javadoc>
+    </target>
+</project>
